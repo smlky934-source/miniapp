@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>مینی‌اپ فعال‌سازی ربات تلگرام</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --surface: #fffdf8;
+        --surface-2: #efe9db;
+        --ink: #1c1a15;
+        --ink-soft: #57503f;
+        --line: #ddd3bd;
+        --accent: #e8930c;
+        --accent-deep: #b96f00;
+        --accent-soft: #fbeed3;
+        --ok: #1e7d46;
+        --ok-soft: #e2f2e7;
+        --bad: #b3372c;
+        --bad-soft: #fbe7e4;
+        --chat-bg: #e9e2d0;
+        --bubble: #fffdf8;
+        --shadow: 0 10px 30px rgba(60, 45, 10, 0.12);
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #12100c;
+          --surface: #1d1a14;
+          --surface-2: #29241a;
+          --ink: #f3ecdc;
+          --ink-soft: #b3a888;
+          --line: #3a3325;
+          --accent: #f5a623;
+          --accent-deep: #f5a623;
+          --accent-soft: #3a2c10;
+          --ok: #4cc38a;
+          --ok-soft: #173527;
+          --bad: #ff8a7a;
+          --bad-soft: #3d1d18;
+          --chat-bg: #171410;
+          --bubble: #26221a;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+          color-scheme: dark;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Vazirmatn", system-ui, sans-serif;
+        line-height: 1.7;
+      }
+      .wrap {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 20px 16px 48px;
+      }
+
+      /* ---------- Welcome chat ---------- */
+      .chat {
+        background: var(--chat-bg);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 16px 14px 14px;
+        box-shadow: var(--shadow);
+      }
+      .chat-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed var(--line);
+        margin-bottom: 14px;
+      }
+      .avatar {
+        width: 46px; height: 46px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #221a05;
+        display: grid;
+        place-items: center;
+      }
+      .avatar svg { width: 26px; height: 26px; }
+      .chat-head .who { line-height: 1.35; }
+      .chat-head .who b { font-size: 1.02rem; font-weight: 800; display: block; }
+      .chat-head .who span { font-size: 0.8rem; color: var(--ink-soft); }
+      .online-dot {
+        display: inline-block;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: var(--ok);
+        margin-inline-start: 4px;
+        vertical-align: middle;
+      }
+      .bubble {
+        background: var(--bubble);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        border-start-start-radius: 4px;
+        padding: 14px 16px;
+        font-size: 0.98rem;
+      }
+      .bubble p { margin: 0 0 10px; }
+      .bubble p:last-child { margin-bottom: 0; }
+      .bubble .big { font-size: 1.12rem; font-weight: 800; }
+      .bubble .tick {
+        display: block;
+        text-align: left;
+        direction: ltr;
+        font-size: 0.72rem;
+        color: var(--ink-soft);
+        margin-top: 8px;
+      }
+      .quick {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .quick button {
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 700;
+        background: var(--surface);
+        color: var(--accent-deep);
+        border: 1.5px solid var(--accent);
+        border-radius: 999px;
+        padding: 6px 14px;
+        cursor: pointer;
+      }
+      .quick button:active { transform: scale(0.97); }
+
+      /* ---------- Progress ---------- */
+      .progress {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 26px 2px 6px;
+      }
+      .progress .seg {
+        flex: 1;
+        height: 6px;
+        border-radius: 99px;
+        background: var(--surface-2);
+        overflow: hidden;
+      }
+      .progress .seg i {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+        border-radius: 99px;
+        transition: width 0.35s ease;
+      }
+      .progress .seg.done i { width: 100%; }
+      .step-label {
+        font-size: 0.85rem;
+        color: var(--ink-soft);
+        margin: 0 2px 14px;
+      }
+      .step-label b { color: var(--ink); }
+
+      /* ---------- Panels ---------- */
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 20px 18px;
+        box-shadow: var(--shadow);
+      }
+      .panel[hidden] { display: none; }
+      .panel h2 {
+        margin: 0 0 4px;
+        font-size: 1.25rem;
+        font-weight: 900;
+        line-height: 1.4;
+      }
+      .panel .sub {
+        margin: 0 0 18px;
+        color: var(--ink-soft);
+        font-size: 0.92rem;
+      }
+      .field { margin-bottom: 18px; }
+      .field:last-child { margin-bottom: 0; }
+      label.lbl, .lbl {
+        display: block;
+        font-weight: 800;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+      }
+      .hint {
+        font-size: 0.8rem;
+        color: var(--ink-soft);
+        margin-top: 6px;
+      }
+      input[type="text"], input[type="password"], input[type="time"], select, textarea {
+        font: inherit;
+        width: 100%;
+        background: var(--surface);
+        color: var(--ink);
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 11px 14px;
+        outline: none;
+      }
+      input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+      input.invalid, select.invalid { border-color: var(--bad); }
+      .ltr { direction: ltr; text-align: left; }
+      .err {
+        display: none;
+        color: var(--bad);
+        font-size: 0.82rem;
+        margin-top: 6px;
+        font-weight: 500;
+      }
+      .err.show { display: block; }
+      .ok-note {
+        display: none;
+        color: var(--ok);
+        font-size: 0.82rem;
+        margin-top: 6px;
+        font-weight: 700;
+      }
+      .ok-note.show { display: block; }
+
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip {
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 700;
+        background: var(--surface-2);
+        color: var(--ink);
+        border: 1.5px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 15px;
+        cursor: pointer;
+      }
+      .chip[aria-pressed="true"] {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent-deep);
+      }
+      .add-row { display: flex; gap: 8px; margin-top: 10px; }
+      .add-row input { flex: 1; }
+      .add-row button {
+        font: inherit;
+        font-weight: 800;
+        background: var(--surface-2);
+        color: var(--ink);
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 0 18px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .opt-cards { display: grid; gap: 10px; }
+      .opt {
+        font: inherit;
+        text-align: start;
+        background: var(--surface);
+        border: 1.5px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 14px;
+        cursor: pointer;
+        color: var(--ink);
+      }
+      .opt b { display: block; font-size: 0.97rem; }
+      .opt span { font-size: 0.83rem; color: var(--ink-soft); }
+      .opt[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .rule-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+      .rule-list li {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        background: var(--surface-2);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 0.92rem;
+      }
+      .rule-list svg {
+        flex: 0 0 auto;
+        width: 20px; height: 20px;
+        color: var(--ok);
+        margin-top: 3px;
+      }
+
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--line);
+      }
+      .toggle-row:last-of-type { border-bottom: none; }
+      .toggle-row .t b { display: block; font-size: 0.95rem; }
+      .toggle-row .t span { font-size: 0.82rem; color: var(--ink-soft); }
+      .switch {
+        flex: 0 0 auto;
+        width: 52px; height: 30px;
+        border-radius: 99px;
+        border: 1.5px solid var(--line);
+        background: var(--surface-2);
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+      }
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        inset-inline-start: 4px;
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: var(--ink-soft);
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+      .switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+      .switch[aria-checked="true"]::after {
+        background: #fff8ea;
+        transform: translateX(-20px);
+      }
+      [dir="rtl"] .switch[aria-checked="true"]::after { transform: translateX(20px); }
+
+      .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .range-val {
+        display: inline-block;
+        background: var(--accent-soft);
+        color: var(--accent-deep);
+        font-weight: 800;
+        border-radius: 8px;
+        padding: 1px 10px;
+        font-size: 0.9rem;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+        margin: 4px 0 2px;
+      }
+      .range-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+      .secret-wrap { position: relative; }
+      .secret-wrap input { padding-inline-end: 74px; }
+      .eye {
+        position: absolute;
+        top: 50%;
+        inset-inline-end: 8px;
+        transform: translateY(-50%);
+        font: inherit;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 4px 10px;
+        cursor: pointer;
+      }
+      .warn-box {
+        background: var(--accent-soft);
+        border: 1px dashed var(--accent);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 0.88rem;
+        margin-bottom: 18px;
+      }
+      .warn-box b { color: var(--accent-deep); }
+
+      /* ---------- Nav buttons ---------- */
+      .nav {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .btn {
+        font: inherit;
+        font-weight: 800;
+        font-size: 1rem;
+        border-radius: 14px;
+        padding: 13px 20px;
+        cursor: pointer;
+        border: 1.5px solid var(--line);
+        background: var(--surface);
+        color: var(--ink);
+      }
+      .btn.primary {
+        flex: 1;
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #221a05;
+      }
+      .btn.primary:active { transform: scale(0.99); }
+      .btn:disabled { opacity: 0.5; cursor: default; }
+
+      /* ---------- Summary ---------- */
+      .sum { display: grid; gap: 0; }
+      .sum .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--line);
+        font-size: 0.93rem;
+      }
+      .sum .row:last-child { border-bottom: none; }
+      .sum .k { color: var(--ink-soft); flex: 0 0 auto; }
+      .sum .v { font-weight: 700; text-align: left; word-break: break-word; }
+      .mono { font-family: ui-monospace, "Courier New", monospace; direction: ltr; unicode-bidi: embed; }
+      .next-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: step; }
+      .next-steps li {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        font-size: 0.94rem;
+      }
+      .next-steps .n {
+        flex: 0 0 auto;
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #221a05;
+        font-weight: 900;
+        display: grid;
+        place-items: center;
+        font-size: 0.9rem;
+        margin-top: 2px;
+      }
+      .success-head {
+        text-align: center;
+        padding: 6px 0 16px;
+      }
+      .success-head .ring {
+        width: 72px; height: 72px;
+        margin: 0 auto 12px;
+        border-radius: 50%;
+        background: var(--ok-soft);
+        color: var(--ok);
+        display: grid;
+        place-items: center;
+      }
+      .success-head .ring svg { width: 38px; height: 38px; }
+      .success-head h2 { margin: 0 0 4px; }
+      .success-head p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+      .toast {
+        position: fixed;
+        inset-inline: 16px;
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        max-width: 528px;
+        margin: 0 auto;
+        background: var(--ink);
+        color: var(--bg);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        z-index: 20;
+      }
+      .toast.show { opacity: 1; transform: translateY(0); }
+      @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+
+      <!-- ======== Welcome ======== -->
+      <section class="chat" aria-label="پیام خوش‌آمد ربات">
+        <div class="chat-head">
+          <div class="avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/><circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/><path d="M9.5 17.5h5"/></svg>
+          </div>
+          <div class="who">
+            <b>ربات ادمین کانال</b>
+            <span>آنلاین<span class="online-dot"></span> · آماده‌به‌خدمت</span>
+          </div>
+        </div>
+        <div class="bubble">
+          <p class="big">سلام داش! مخلصتم، چشم مایی، عمویی 🤝</p>
+          <p>بالاخره پیدات شد! من ربات ادمینم؛ کارم اینه که کانالت رو مثل ساعت بچرخونم: خبر و محتوای تازه رو از منبع‌هایی که می‌گی پیدا می‌کنم، تمیز و خودمونی بازنویسی می‌کنم و سر ساعت‌هایی که خودت چیدی می‌فرستم توی کانال. نه پست تکراری، نه خواب موندن، نه دردسر.</p>
+          <p>تو فقط پایین چند تا چیز رو بچین: <b>موضوع و منبع‌ها</b>، <b>آیدی کانال</b>، <b>قانون‌های پست</b> و <b>ساعت کاری</b>. آخر سر هم فقط <b>کلید هوش مصنوعی خودت</b> رو می‌دی؛ بازنویسی خبرها با اعتبار خودته، ولی پست‌ها رو خودم می‌فرستم — ربات اصلی ما، <b class="mono">@Kiumars_Torkibot</b>. یعنی نه ربات جدا لازم داری، نه توکن؛ فقط منو ادمین کانالت می‌کنی و بعد از تأییدم، کار شروع می‌شه. بقیه‌ش رو بسپر به من.</p>
+          <span class="tick">✓✓ الآن</span>
+        </div>
+        <div class="quick">
+          <button type="button" id="startBtn">بزن بریم، فعالم کن 🚀</button>
+          <button type="button" id="howBtn">اصلاً چیکار می‌کنی؟</button>
+        </div>
+      </section>
+
+      <!-- ======== Progress ======== -->
+      <div class="progress" id="progress" aria-hidden="true">
+        <div class="seg"><i></i></div>
+        <div class="seg"><i></i></div>
+        <div class="seg"><i></i></div>
+        <div class="seg"><i></i></div>
+        <div class="seg"><i></i></div>
+        <div class="seg"><i></i></div>
+      </div>
+      <p class="step-label" id="stepLabel">قدم <b>۱ از ۶</b> — موضوع و منبع‌ها</p>
+
+      <!-- ======== Step 1: Topic & sources ======== -->
+      <section class="panel" data-step="1">
+        <h2>کانالت درباره چیه، داش؟</h2>
+        <p class="sub">موضوع محتوا و منبع‌هایی که باید زیر نظر بگیرم رو مشخص کن.</p>
+
+        <div class="field">
+          <span class="lbl">موضوع محتوا</span>
+          <div class="chips" id="topicChips">
+            <button type="button" class="chip" aria-pressed="true">هوش مصنوعی</button>
+            <button type="button" class="chip" aria-pressed="false">تکنولوژی</button>
+            <button type="button" class="chip" aria-pressed="false">استارتاپ و کسب‌وکار</button>
+            <button type="button" class="chip" aria-pressed="false">گجت و موبایل</button>
+            <button type="button" class="chip" aria-pressed="false">برنامه‌نویسی</button>
+            <button type="button" class="chip" aria-pressed="false">بازی و سرگرمی</button>
+          </div>
+          <div class="add-row">
+            <input type="text" id="customTopic" placeholder="موضوع دیگه‌ای داری؟ اینجا بنویس…" />
+            <button type="button" id="addTopic">افزودن</button>
+          </div>
+          <p class="err" id="topicErr">داش، حداقل یه موضوع انتخاب کن که بدونم دنبال چی بگردم.</p>
+        </div>
+
+        <div class="field">
+          <span class="lbl">منبع‌های محتوا</span>
+          <div class="chips" id="sourceChips">
+            <button type="button" class="chip" aria-pressed="true">hooshio.com</button>
+            <button type="button" class="chip" aria-pressed="true">digiato.com</button>
+            <button type="button" class="chip" aria-pressed="true">zoomit.ir</button>
+            <button type="button" class="chip" aria-pressed="false">منابع معتبر تکمیلی به انتخاب ربات</button>
+          </div>
+          <div class="add-row">
+            <input type="text" id="customSource" class="ltr" placeholder="example.com" />
+            <button type="button" id="addSource">افزودن</button>
+          </div>
+          <p class="hint">هر سایتی که اضافه کنی، هر بار چرخه بررسی اون رو هم چک می‌کنم.</p>
+          <p class="err" id="sourceErr">حداقل یه منبع لازم دارم، داش.</p>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn primary" data-next>قدم بعد: کانال من</button>
+        </div>
+      </section>
+
+      <!-- ======== Step 2: Channel ======== -->
+      <section class="panel" data-step="2" hidden>
+        <h2>کانالت کجاست؟</h2>
+        <p class="sub">آیدی کانالی رو بده که قراره توش پست بذارم. آخر کار هم ربات اصلی ما، ‎@Kiumars_Torkibot‎، رو توی همین کانال ادمین می‌کنی تا بتونم پست بذارم؛ قدم آخر دقیق نشونت می‌دم.</p>
+
+        <div class="field">
+          <label class="lbl" for="channelId">آیدی کانال</label>
+          <input type="text" id="channelId" class="ltr" placeholder="@mychannel  یا  -1001234567890" autocomplete="off" />
+          <p class="hint">اگه کانالت عمومیه یوزرنیمش (@...) رو بنویس؛ اگه خصوصیه، آیدی عددیش رو که با ‎-100‎ شروع می‌شه.</p>
+          <p class="err" id="channelErr">این آیدی درست به نظر نمیاد، داش. یا ‎@username‎ بنویس یا آیدی عددی کانال رو.</p>
+          <p class="ok-note" id="channelOk">✓ آیدی کانال قبوله.</p>
+        </div>
+
+        <div class="field">
+          <label class="lbl" for="channelLink">لینک کانال (برای انتهای پست‌ها)</label>
+          <input type="text" id="channelLink" class="ltr" placeholder="https://t.me/mychannel" autocomplete="off" />
+          <p class="hint">این لینک آخر هر پست میاد تا مخاطب‌ها راه کانالت رو گم نکنن. خالی هم بذاری، از روی آیدی می‌سازمش.</p>
+          <p class="err" id="linkErr">لینک باید شبیه ‎https://t.me/…‎ باشه.</p>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" data-back>قبلی</button>
+          <button type="button" class="btn primary" data-next>قدم بعد: قانون‌های پست</button>
+        </div>
+      </section>
+
+      <!-- ======== Step 3: Rules ======== -->
+      <section class="panel" data-step="3" hidden>
+        <h2>قانون‌های بازی رو بچین</h2>
+        <p class="sub">پست‌ها دقیقاً با همین قانون‌ها نوشته و فرستاده می‌شن.</p>
+
+        <div class="field">
+          <span class="lbl">لحن پست‌ها</span>
+          <div class="opt-cards" id="toneCards">
+            <button type="button" class="opt" aria-pressed="true" data-tone="خودمانی، مسلط و ادمین‌طور">
+              <b>خودمانی و مسلط</b>
+              <span>مثل یه ادمین باتجربه که خودش خبر رو خونده و برای مخاطب تعریف می‌کنه؛ نه کتابی، نه لوس.</span>
+            </button>
+            <button type="button" class="opt" aria-pressed="false" data-tone="رسمی و خبری">
+              <b>رسمی و خبری</b>
+              <span> لحن خبرگزاری؛ کوتاه، دقیق و بدون صمیمیت اضافه.</span>
+            </button>
+            <button type="button" class="opt" aria-pressed="false" data-tone="پرانرژی و هیجانی">
+              <b>پرانرژی و هیجانی</b>
+              <span>تیترهای داغ و ریتم تند برای کانال‌های پرسرعت.</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="lbl">طول هر پست: <span class="range-val" id="lenVal">۵۰ تا ۱۰۰ کلمه</span></span>
+          <div class="range-pair">
+            <div>
+              <label class="hint" for="lenMin">حداقل</label>
+              <input type="range" id="lenMin" min="20" max="300" step="10" value="50" />
+            </div>
+            <div>
+              <label class="hint" for="lenMax">حداکثر</label>
+              <input type="range" id="lenMax" min="20" max="300" step="10" value="100" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="lbl">قانون‌های ثابت کانال</span>
+          <ul class="rule-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>فقط محتوای <b>تازه‌ی همان روز</b> منتشر می‌شه؛ خبر کهنه راه نداره.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span><b>پست تکراری ممنوع</b>؛ هر خبر فقط یه بار میاد توی کانال.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>هر خبر یه <b>پست جدا با عکس مرتبط</b> خودش رو داره.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span><b>لینک کانالت</b> آخر هر پست میاد و <b>منبع خبر داخل پست درج نمی‌شه</b>.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>اگه محتوای تازه‌ای نبود، <b>هیچ پستی فرستاده نمی‌شه</b>؛ کانال رو با خبر زورکی پر نمی‌کنم.</span></li>
+          </ul>
+        </div>
+
+        <div class="field">
+          <div class="toggle-row">
+            <div class="t">
+              <b>ایموجی در پست‌ها</b>
+              <span>حداکثر ۲ تا ۳ ایموجی مرتبط با موضوع هر پست</span>
+            </div>
+            <button type="button" class="switch" id="swEmoji" role="switch" aria-checked="true" aria-label="ایموجی در پست‌ها"></button>
+          </div>
+          <div class="toggle-row">
+            <div class="t">
+              <b>سؤال از مخاطب</b>
+              <span>گاهی آخر پست‌ها از مخاطب‌ها سؤال می‌پرسم، نه همیشه</span>
+            </div>
+            <button type="button" class="switch" id="swQuestion" role="switch" aria-checked="false" aria-label="سؤال از مخاطب"></button>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" data-back>قبلی</button>
+          <button type="button" class="btn primary" data-next>قدم بعد: ساعت‌های فعالیت</button>
+        </div>
+      </section>
+
+      <!-- ======== Step 4: Schedule ======== -->
+      <section class="panel" data-step="4" hidden>
+        <h2>کی کار کنم، کی بخوابم؟</h2>
+        <p class="sub">چرخه بررسی منبع‌ها و بازه سکوتی که توش هیچ پستی فرستاده نمی‌شه.</p>
+
+        <div class="field">
+          <label class="lbl" for="interval">هر چند وقت منبع‌ها رو چک کنم؟</label>
+          <select id="interval">
+            <option value="هر ۳۰ دقیقه">هر ۳۰ دقیقه</option>
+            <option value="هر ۱ ساعت" selected>هر ۱ ساعت</option>
+            <option value="هر ۲ ساعت">هر ۲ ساعت</option>
+            <option value="هر ۳ ساعت">هر ۳ ساعت</option>
+            <option value="هر ۶ ساعت">هر ۶ ساعت</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="toggle-row" style="border-bottom:none;padding-top:0;">
+            <div class="t">
+              <b>بازه سکوت شبانه</b>
+              <span>تو این ساعت‌ها بررسی می‌کنم ولی پستی نمی‌فرستم</span>
+            </div>
+            <button type="button" class="switch" id="swSilence" role="switch" aria-checked="true" aria-label="بازه سکوت شبانه"></button>
+          </div>
+          <div class="time-row" id="silenceTimes">
+            <div>
+              <label class="hint" for="silenceFrom">از ساعت</label>
+              <input type="time" id="silenceFrom" value="00:00" />
+            </div>
+            <div>
+              <label class="hint" for="silenceTo">تا ساعت</label>
+              <input type="time" id="silenceTo" value="08:00" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="lbl">روزهای فعالیت</span>
+          <div class="chips" id="dayChips">
+            <button type="button" class="chip" aria-pressed="true">شنبه</button>
+            <button type="button" class="chip" aria-pressed="true">یکشنبه</button>
+            <button type="button" class="chip" aria-pressed="true">دوشنبه</button>
+            <button type="button" class="chip" aria-pressed="true">سه‌شنبه</button>
+            <button type="button" class="chip" aria-pressed="true">چهارشنبه</button>
+            <button type="button" class="chip" aria-pressed="true">پنجشنبه</button>
+            <button type="button" class="chip" aria-pressed="true">جمعه</button>
+          </div>
+          <p class="err" id="dayErr">داش، حداقل یه روز رو روشن بذار.</p>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" data-back>قبلی</button>
+          <button type="button" class="btn primary" data-next>قدم بعد: کلید API</button>
+        </div>
+      </section>
+
+      <!-- ======== Step 5: API key ======== -->
+      <section class="panel" data-step="5" hidden>
+        <h2>کلیدت رو بده به داشِت</h2>
+        <p class="sub">اینجا قلب ماجراست و فقط یه چیز ازت می‌خوام: کلید هوش مصنوعی خودت. هزینه بازنویسی روی حساب خودته؛ توکن و ربات جدا اصلاً لازم نیست، چون پست‌ها رو ربات اصلی ما می‌فرسته.</p>
+
+        <div class="warn-box">
+          <b>یه قول مردونه:</b> کلیدت امانته. کامل هیچ‌جا نمایش داده نمی‌شه و هر وقت خواستی می‌تونی کلید رو ببندی یا ربات ما رو از ادمینی کانالت برداری؛ دسترسی‌ام همون لحظه قطع می‌شه.
+        </div>
+
+        <div class="field">
+          <label class="lbl" for="aiProvider">سرویس هوش مصنوعی</label>
+          <select id="aiProvider">
+            <option value="OpenAI">OpenAI</option>
+            <option value="OpenRouter">OpenRouter</option>
+            <option value="Anthropic (Claude)">Anthropic (Claude)</option>
+            <option value="Google Gemini">Google Gemini</option>
+            <option value="سرویس ایرانی (سازگار با OpenAI)">سرویس ایرانی (سازگار با OpenAI)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="lbl" for="apiKey">کلید API هوش مصنوعی</label>
+          <div class="secret-wrap">
+            <input type="password" id="apiKey" class="ltr mono" placeholder="sk-…" autocomplete="off" spellcheck="false" />
+            <button type="button" class="eye" data-eye="apiKey">نمایش</button>
+          </div>
+          <p class="hint">بازنویسی خبرها با همین کلید و از اعتبار خودت انجام می‌شه؛ از کلید کسی دیگه‌ای استفاده نمی‌شه.</p>
+          <p class="err" id="keyErr">کلید API رو وارد نکردی یا خیلی کوتاهه، داش.</p>
+          <p class="ok-note" id="keyOk">✓ کلید وارد شد.</p>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" data-back>قبلی</button>
+          <button type="button" class="btn primary" data-next>قدم بعد: بررسی و تأیید</button>
+        </div>
+      </section>
+
+      <!-- ======== Step 6: Review ======== -->
+      <section class="panel" data-step="6" hidden>
+        <h2>یه نگاه بنداز، داش</h2>
+        <p class="sub">اگه همه‌چیز همینه که می‌خوای، تأیید کن تا خلاصه تنظیماتت رو آماده کنم.</p>
+        <div class="sum" id="summary"></div>
+        <div class="nav">
+          <button type="button" class="btn" data-back>قبلی</button>
+          <button type="button" class="btn primary" id="confirmBtn">تأیید و فعال‌سازی</button>
+        </div>
+      </section>
+
+      <!-- ======== Done ======== -->
+      <section class="panel" data-step="7" hidden>
+        <div class="success-head">
+          <div class="ring">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h2>تمام شد، داش! کارت درسته 🎉</h2>
+          <p>خلاصه تنظیماتت آماده‌ست. فقط دو قدم کوچیک مونده تا ربات بیفته به کار.</p>
+        </div>
+
+        <ol class="next-steps">
+          <li><span class="n">۱</span><span><b>ربات اصلی ما رو ادمین کانالت کن:</b> توی کانالت، <span class="mono">@Kiumars_Torkibot</span> رو ادمین کن و دسترسی «ارسال پیام» رو بهش بده؛ پست‌ها با همین ربات فرستاده می‌شن و بدون این دسترسی دستم بسته‌ست.</span></li>
+          <li><span class="n">۲</span><span><b>خلاصه تنظیمات رو کپی کن و توی پیوی ربات اصلی بفرست</b> تا حسابت ساخته بشه.</span></li>
+          <li><span class="n">۳</span><span><b>منتظر تأیید ربات بمون:</b> ربات کلید API‌ت رو تست می‌کنه و چک می‌کنه که خودش ادمین کانالته و دسترسی ارسال داره؛ اگه همه‌چیز درست بود تأییدت می‌کنه و فعالیت طبق قانون‌ها و ساعت‌هایی که چیدی شروع می‌شه. اگه هنوز ادمین نبودم، خودش بهت می‌گه و بعد از ادمین کردن کافیه دوباره چک کنی.</span></li>
+        </ol>
+
+        <div class="nav">
+          <button type="button" class="btn primary" id="copyBtn">کپی خلاصه تنظیمات</button>
+          <button type="button" class="btn" id="restartBtn">از اول</button>
+        </div>
+        <p class="hint" style="text-align:center;margin-top:12px;">کلیدت توی خلاصه به‌صورت ناقص و پوشیده میاد؛ نسخه کاملش فقط وقتی لازمه که خودت مستقیم به ربات بدی.</p>
+      </section>
+
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      (function () {
+        var stepNames = ["موضوع و منبع‌ها", "کانال من", "قانون‌های پست", "ساعت‌های فعالیت", "کلید API", "بررسی و تأیید"];
+        var current = 1;
+        var total = 6;
+        var panels = document.querySelectorAll(".panel[data-step]");
+        var segs = document.querySelectorAll("#progress .seg");
+        var stepLabel = document.getElementById("stepLabel");
+        var toast = document.getElementById("toast");
+        var toastTimer = null;
+
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add("show");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+        }
+
+        function faNum(n) {
+          return String(n).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; });
+        }
+
+        function goTo(n) {
+          current = n;
+          panels.forEach(function (p) {
+            p.hidden = Number(p.getAttribute("data-step")) !== n;
+          });
+          segs.forEach(function (s, i) {
+            s.classList.toggle("done", i < Math.min(n, total));
+          });
+          if (n <= total) {
+            stepLabel.innerHTML = "قدم <b>" + faNum(n) + " از " + faNum(total) + "</b> — " + stepNames[n - 1];
+            stepLabel.style.display = "";
+            document.getElementById("progress").style.display = "";
+          } else {
+            stepLabel.style.display = "none";
+            document.getElementById("progress").style.display = "none";
+          }
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          if (n === 6) buildSummary();
+        }
+
+        /* ----- chips (multi toggle) ----- */
+        function chipGroup(id) {
+          var box = document.getElementById(id);
+          box.addEventListener("click", function (e) {
+            var b = e.target.closest(".chip");
+            if (!b || b.dataset.custom === "1") return;
+            b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+          });
+          return box;
+        }
+        var topicBox = chipGroup("topicChips");
+        var sourceBox = chipGroup("sourceChips");
+        var dayBox = chipGroup("dayChips");
+
+        function selectedTexts(box) {
+          var out = [];
+          box.querySelectorAll('.chip[aria-pressed="true"]').forEach(function (c) { out.push(c.textContent.trim()); });
+          return out;
+        }
+
+        function addChip(box, text) {
+          var exists = false;
+          box.querySelectorAll(".chip").forEach(function (c) {
+            if (c.textContent.trim().toLowerCase() === text.toLowerCase()) exists = true;
+          });
+          if (exists) return;
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "chip";
+          b.setAttribute("aria-pressed", "true");
+          b.textContent = text;
+          box.appendChild(b);
+        }
+
+        document.getElementById("addTopic").addEventListener("click", function () {
+          var inp = document.getElementById("customTopic");
+          var v = inp.value.trim();
+          if (!v) return;
+          addChip(topicBox, v);
+          inp.value = "";
+        });
+        document.getElementById("customTopic").addEventListener("keydown", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); document.getElementById("addTopic").click(); }
+        });
+        document.getElementById("addSource").addEventListener("click", function () {
+          var inp = document.getElementById("customSource");
+          var v = inp.value.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+          if (!v) return;
+          addChip(sourceBox, v);
+          inp.value = "";
+        });
+        document.getElementById("customSource").addEventListener("keydown", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); document.getElementById("addSource").click(); }
+        });
+
+        /* ----- tone cards (single select) ----- */
+        var tone = "خودمانی، مسلط و ادمین‌طور";
+        document.getElementById("toneCards").addEventListener("click", function (e) {
+          var b = e.target.closest(".opt");
+          if (!b) return;
+          this.querySelectorAll(".opt").forEach(function (o) { o.setAttribute("aria-pressed", "false"); });
+          b.setAttribute("aria-pressed", "true");
+          tone = b.getAttribute("data-tone");
+        });
+
+        /* ----- switches ----- */
+        function wireSwitch(id) {
+          var el = document.getElementById(id);
+          el.addEventListener("click", function () {
+            var on = el.getAttribute("aria-checked") === "true";
+            el.setAttribute("aria-checked", on ? "false" : "true");
+            if (id === "swSilence") {
+              document.getElementById("silenceTimes").style.opacity = on ? "0.45" : "1";
+              document.getElementById("silenceFrom").disabled = on;
+              document.getElementById("silenceTo").disabled = on;
+            }
+          });
+          return el;
+        }
+        var swEmoji = wireSwitch("swEmoji");
+        var swQuestion = wireSwitch("swQuestion");
+        var swSilence = wireSwitch("swSilence");
+        function swOn(el) { return el.getAttribute("aria-checked") === "true"; }
+
+        /* ----- length sliders ----- */
+        var lenMin = document.getElementById("lenMin");
+        var lenMax = document.getElementById("lenMax");
+        var lenVal = document.getElementById("lenVal");
+        function syncLen(from) {
+          var a = Number(lenMin.value), b = Number(lenMax.value);
+          if (a > b) {
+            if (from === "min") { lenMax.value = a; b = a; }
+            else { lenMin.value = b; a = b; }
+          }
+          lenVal.textContent = faNum(a) + " تا " + faNum(b) + " کلمه";
+        }
+        lenMin.addEventListener("input", function () { syncLen("min"); });
+        lenMax.addEventListener("input", function () { syncLen("max"); });
+        syncLen("min");
+
+        /* ----- secret visibility ----- */
+        document.querySelectorAll(".eye").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var inp = document.getElementById(btn.getAttribute("data-eye"));
+            var show = inp.type === "password";
+            inp.type = show ? "text" : "password";
+            btn.textContent = show ? "پنهان" : "نمایش";
+          });
+        });
+
+        /* ----- live validation hints ----- */
+        var keyInp = document.getElementById("apiKey");
+        keyInp.addEventListener("input", function () {
+          var ok = keyInp.value.trim().length >= 12;
+          document.getElementById("keyOk").classList.toggle("show", ok);
+          if (ok) { document.getElementById("keyErr").classList.remove("show"); keyInp.classList.remove("invalid"); }
+        });
+        var chInp = document.getElementById("channelId");
+        chInp.addEventListener("input", function () {
+          document.getElementById("channelOk").classList.toggle("show", validChannel(chInp.value.trim()));
+          chInp.classList.remove("invalid");
+          document.getElementById("channelErr").classList.remove("show");
+        });
+
+        function validChannel(v) {
+          return /^@[A-Za-z0-9_]{4,}$/.test(v) || /^-100\d{6,}$/.test(v) || /^[A-Za-z][A-Za-z0-9_]{4,}$/.test(v);
+        }
+
+        /* ----- validation per step ----- */
+        function validateStep(n) {
+          if (n === 1) {
+            var t = selectedTexts(topicBox).length > 0;
+            var s = selectedTexts(sourceBox).length > 0;
+            document.getElementById("topicErr").classList.toggle("show", !t);
+            document.getElementById("sourceErr").classList.toggle("show", !s);
+            return t && s;
+          }
+          if (n === 2) {
+            var v = chInp.value.trim();
+            var ok = validChannel(v);
+            document.getElementById("channelErr").classList.toggle("show", !ok);
+            chInp.classList.toggle("invalid", !ok);
+            var link = document.getElementById("channelLink").value.trim();
+            var linkOk = link === "" || /^https:\/\/t\.me\/[A-Za-z0-9_+\/]+$/.test(link);
+            document.getElementById("linkErr").classList.toggle("show", !linkOk);
+            document.getElementById("channelLink").classList.toggle("invalid", !linkOk);
+            return ok && linkOk;
+          }
+          if (n === 4) {
+            var d = selectedTexts(dayBox).length > 0;
+            document.getElementById("dayErr").classList.toggle("show", !d);
+            return d;
+          }
+          if (n === 5) {
+            var key = keyInp.value.trim().length >= 12;
+            document.getElementById("keyErr").classList.toggle("show", !key);
+            keyInp.classList.toggle("invalid", !key);
+            return key;
+          }
+          return true;
+        }
+
+        /* ----- nav ----- */
+        document.querySelectorAll("[data-next]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            if (validateStep(current)) goTo(current + 1);
+            else showToast("داش، این قدم یه چیزی کم داره؛ قرمزا رو درست کن 🙏");
+          });
+        });
+        document.querySelectorAll("[data-back]").forEach(function (b) {
+          b.addEventListener("click", function () { goTo(current - 1); });
+        });
+        document.getElementById("startBtn").addEventListener("click", function () {
+          document.querySelector('[data-step="1"]').scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        document.getElementById("howBtn").addEventListener("click", function () {
+          showToast("منبع‌ها رو چک می‌کنم، خبر تازه رو با کلید API خودت بازنویسی می‌کنم و خودم — ربات اصلی @Kiumars_Torkibot — سر ساعت توی کانالت پست می‌کنم 🤖");
+        });
+
+        /* ----- summary ----- */
+        function maskKey(k) {
+          if (k.length <= 8) return "••••••";
+          return k.slice(0, 3) + "•••" + k.slice(-4);
+        }
+        function channelLinkVal() {
+          var link = document.getElementById("channelLink").value.trim();
+          if (link) return link;
+          var id = chInp.value.trim();
+          if (id.charAt(0) === "@") return "https://t.me/" + id.slice(1);
+          if (/^[A-Za-z]/.test(id)) return "https://t.me/" + id;
+          return "—";
+        }
+        function collect() {
+          return {
+            topics: selectedTexts(topicBox),
+            sources: selectedTexts(sourceBox),
+            channel: chInp.value.trim(),
+            link: channelLinkVal(),
+            tone: tone,
+            lenMin: lenMin.value,
+            lenMax: lenMax.value,
+            emoji: swOn(swEmoji),
+            question: swOn(swQuestion),
+            interval: document.getElementById("interval").value,
+            silence: swOn(swSilence),
+            silenceFrom: document.getElementById("silenceFrom").value,
+            silenceTo: document.getElementById("silenceTo").value,
+            days: selectedTexts(dayBox),
+            provider: document.getElementById("aiProvider").value,
+            senderBot: "@Kiumars_Torkibot",
+            key: keyInp.value.trim()
+          };
+        }
+        function row(k, v, mono) {
+          return '<div class="row"><span class="k">' + k + '</span><span class="v' + (mono ? " mono" : "") + '">' + v + "</span></div>";
+        }
+        function esc(s) {
+          return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        function buildSummary() {
+          var c = collect();
+          var html = "";
+          html += row("موضوع‌ها", esc(c.topics.join("، ")));
+          html += row("منبع‌ها", esc(c.sources.join("، ")));
+          html += row("آیدی کانال", esc(c.channel), true);
+          html += row("لینک انتهای پست", esc(c.link), true);
+          html += row("لحن پست‌ها", esc(c.tone));
+          html += row("طول پست", faNum(c.lenMin) + " تا " + faNum(c.lenMax) + " کلمه");
+          html += row("ایموجی در پست", c.emoji ? "روشن (حداکثر ۲–۳ تا)" : "خاموش");
+          html += row("سؤال از مخاطب", c.question ? "روشن" : "خاموش");
+          html += row("چرخه بررسی", esc(c.interval));
+          html += row("بازه سکوت", c.silence ? (faNum(c.silenceFrom) + " تا " + faNum(c.silenceTo)) : "ندارد");
+          html += row("روزهای فعالیت", esc(c.days.join("، ")));
+          html += row("سرویس هوش مصنوعی", esc(c.provider));
+          html += row("ربات ارسال‌کننده", esc(c.senderBot) + " (ربات اصلی ما)", true);
+          html += row("کلید API", maskKey(c.key), true);
+          document.getElementById("summary").innerHTML = html;
+        }
+
+        document.getElementById("confirmBtn").addEventListener("click", function () {
+          goTo(7);
+          showToast("مخلصیم داش! خلاصه تنظیماتت آماده‌ست ✅");
+        });
+
+        function summaryText() {
+          var c = collect();
+          var lines = [
+            "🤖 فعال‌سازی ربات ادمین کانال",
+            "موضوع‌ها: " + c.topics.join("، "),
+            "منبع‌ها: " + c.sources.join("، "),
+            "آیدی کانال: " + c.channel,
+            "لینک کانال: " + c.link,
+            "لحن: " + c.tone,
+            "طول پست: " + c.lenMin + " تا " + c.lenMax + " کلمه",
+            "ایموجی: " + (c.emoji ? "روشن (حداکثر ۲-۳)" : "خاموش"),
+            "سؤال از مخاطب: " + (c.question ? "روشن" : "خاموش"),
+            "چرخه بررسی: " + c.interval,
+            "بازه سکوت: " + (c.silence ? c.silenceFrom + " تا " + c.silenceTo : "ندارد"),
+            "روزهای فعالیت: " + c.days.join("، "),
+            "سرویس هوش مصنوعی: " + c.provider,
+            "ربات ارسال‌کننده: " + c.senderBot + " (ربات اصلی ما؛ ادمین کانال)",
+            "کلید API: " + maskKey(c.key)
+          ];
+          return lines.join("\n");
+        }
+
+        document.getElementById("copyBtn").addEventListener("click", function () {
+          var text = summaryText();
+          function done() { showToast("کپی شد، داش! بفرستش توی پیوی ربات ✅"); }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+          } else {
+            fallbackCopy(text, done);
+          }
+        });
+        function fallbackCopy(text, done) {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand("copy"); done(); }
+          catch (e) { showToast("کپی خودکار نشد؛ از قدم بررسی یه اسکرین‌شات بگیر 🙏"); }
+          document.body.removeChild(ta);
+        }
+
+        document.getElementById("restartBtn").addEventListener("click", function () { goTo(1); });
+
+        goTo(1);
+      })();
+    </script>
+  </body>
+</html>
