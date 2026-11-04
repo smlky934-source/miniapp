@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
-    <title>مینی‌اپ فعال‌سازی ربات تلگرام</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+    <title>فعال‌سازی ربات ادمین کانال</title>
     <style>
+
+      @font-face { font-family: "Estedad"; src: url("Estedad-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+      @font-face { font-family: "Estedad"; src: url("Estedad-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+      @font-face { font-family: "Estedad"; src: url("Estedad-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+      @font-face { font-family: "Estedad"; src: url("Estedad-ExtraBold.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+      @font-face { font-family: "Estedad"; src: url("Estedad-Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
       :root {
         --bg: #f4f1ea;
         --surface: #fffdf8;
@@ -56,7 +59,7 @@
         margin: 0;
         background: var(--bg);
         color: var(--ink);
-        font-family: "Vazirmatn", system-ui, sans-serif;
+        font-family: "Estedad", system-ui, sans-serif;
         line-height: 1.7;
       }
       .wrap {
@@ -479,6 +482,44 @@
       @media (prefers-reduced-motion: reduce) {
         * { transition: none !important; }
       }
+
+      /* ---------- Redesign 2026-11-05: Estedad + hand-made identity ---------- */
+      body::before {
+        content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      .wrap { position: relative; z-index: 1; }
+      ::selection { background: var(--accent-soft); }
+      .chat { position: relative; }
+      .stamp {
+        position: absolute; top: -13px; inset-inline-end: 20px; z-index: 3;
+        transform: rotate(-5deg);
+        background: var(--accent-soft); color: var(--accent-deep);
+        border: 2px dashed var(--accent-deep); border-radius: 10px;
+        font-weight: 900; font-size: 0.8rem; padding: 3px 12px;
+        box-shadow: 2px 3px 0 rgba(60, 45, 10, 0.18);
+      }
+      .avatar { transform: rotate(-4deg); border: 2px solid #221a05; box-shadow: 3px 3px 0 rgba(60, 45, 10, 0.28); }
+      .panel { border-top: 6px solid var(--accent); }
+      .progress .seg { height: 8px; }
+      .progress .seg.done i { background: repeating-linear-gradient(45deg, var(--accent) 0 8px, var(--accent-deep) 8px 16px); }
+      .step-label b { font-weight: 900; }
+      .chip { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+      .chip:active { transform: scale(0.96); }
+      .chip[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--accent); }
+      .chip[aria-pressed="true"]::after { content: " ✓"; font-weight: 900; }
+      .opt { transition: box-shadow 0.15s ease, transform 0.15s ease; }
+      .opt:active { transform: scale(0.99); }
+      .opt[aria-pressed="true"] { box-shadow: 4px 4px 0 var(--surface-2); }
+      input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px var(--accent-soft); }
+      .btn.primary { box-shadow: 0 3px 0 var(--accent-deep); }
+      .btn.primary:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-deep); }
+      .btn:not(.primary) { box-shadow: 0 3px 0 var(--line); }
+      .btn:not(.primary):active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+      .quick button { box-shadow: 0 2px 0 var(--accent); }
+      .next-steps .n { transform: rotate(-4deg); border-radius: 38% 62% 55% 45% / 48% 42% 58% 52%; }
+      .success-head .ring { transform: rotate(-5deg); border: 2px dashed var(--ok); }
+      .signature { text-align: center; color: var(--ink-soft); font-size: 0.8rem; margin: 30px 8px 0; }
     </style>
   </head>
   <body>
@@ -495,10 +536,11 @@
             <span>آنلاین<span class="online-dot"></span> · آماده‌به‌خدمت</span>
           </div>
         </div>
+        <div class="stamp" aria-hidden="true">کاملاً رایگان · بدون تبلیغ</div>
         <div class="bubble">
           <p class="big">سلام داش! مخلصتم، چشم مایی، عمویی 🤝</p>
-          <p>بالاخره پیدات شد! من ربات ادمینم؛ کارم اینه که کانالت رو مثل ساعت بچرخونم: خبر و محتوای تازه رو از منبع‌هایی که می‌گی پیدا می‌کنم، تمیز و خودمونی بازنویسی می‌کنم و سر ساعت‌هایی که خودت چیدی می‌فرستم توی کانال. نه پست تکراری، نه خواب موندن، نه دردسر.</p>
-          <p>تو فقط پایین چند تا چیز رو بچین: <b>موضوع و منبع‌ها</b>، <b>آیدی کانال</b>، <b>قانون‌های پست</b> و <b>ساعت کاری</b>. آخر سر هم فقط <b>کلید هوش مصنوعی خودت</b> رو می‌دی؛ بازنویسی خبرها با اعتبار خودته، ولی پست‌ها رو خودم می‌فرستم — ربات اصلی ما، <b class="mono">@Kiumars_Torkibot</b>. یعنی نه ربات جدا لازم داری، نه توکن؛ فقط منو ادمین کانالت می‌کنی و بعد از تأییدم، کار شروع می‌شه. بقیه‌ش رو بسپر به من.</p>
+          <p>بالاخره پیدات شد! کارم اینه که کانالت رو مثل ساعت بچرخونم: محتوای تازه رو از منبع‌هایی که می‌گی پیدا می‌کنم، خودمونی بازنویسی می‌کنم و سر ساعت‌هایی که خودت چیدی می‌فرستم توی کانال. نه پست تکراری، نه خواب‌موندن، نه دردسر.</p>
+          <p>کارت فقط اینه که پایین چهار تا چیز رو بچینی: <b>موضوع و منبع‌ها</b>، <b>آیدی کانال</b>، <b>قانون‌های پست</b> و <b>ساعت کاری</b>. آخرش هم <b>کلید هوش مصنوعی خودت</b> رو می‌دی؛ بازنویسی با اعتبار خودته، ارسال پست‌ها با من — ربات اصلی: <b class="mono">@Kiumars_Torkibot</b>. نه ربات جدا می‌خوای، نه توکن. منو ادمین کانالت کن؛ تأیید که شدم، بقیه‌ش با من.</p>
           <span class="tick">✓✓ الآن</span>
         </div>
         <div class="quick">
@@ -564,7 +606,7 @@
       <!-- ======== Step 2: Channel ======== -->
       <section class="panel" data-step="2" hidden>
         <h2>کانالت کجاست؟</h2>
-        <p class="sub">آیدی کانالی رو بده که قراره توش پست بذارم. آخر کار هم ربات اصلی ما، ‎@Kiumars_Torkibot‎، رو توی همین کانال ادمین می‌کنی تا بتونم پست بذارم؛ قدم آخر دقیق نشونت می‌دم.</p>
+        <p class="sub">آیدی کانالی رو بده که قراره توش پست بذارم؛ آخر کار ربات اصلی ‎@Kiumars_Torkibot‎ رو توش ادمین می‌کنی — قدم آخر نشونت می‌دم چطور.</p>
 
         <div class="field">
           <label class="lbl" for="channelId">آیدی کانال</label>
@@ -577,7 +619,7 @@
         <div class="field">
           <label class="lbl" for="channelLink">لینک کانال (برای انتهای پست‌ها)</label>
           <input type="text" id="channelLink" class="ltr" placeholder="https://t.me/mychannel" autocomplete="off" />
-          <p class="hint">این لینک آخر هر پست میاد تا مخاطب‌ها راه کانالت رو گم نکنن. خالی هم بذاری، از روی آیدی می‌سازمش.</p>
+          <p class="hint">این لینک آخر هر پست میاد. خالی هم بذاری، از روی آیدی می‌سازمش.</p>
           <p class="err" id="linkErr">لینک باید شبیه ‎https://t.me/…‎ باشه.</p>
         </div>
 
@@ -717,7 +759,7 @@
       <!-- ======== Step 5: API key ======== -->
       <section class="panel" data-step="5" hidden>
         <h2>کلیدت رو بده به داشِت</h2>
-        <p class="sub">اینجا قلب ماجراست و فقط یه چیز ازت می‌خوام: کلید هوش مصنوعی خودت. هزینه بازنویسی روی حساب خودته؛ توکن و ربات جدا اصلاً لازم نیست، چون پست‌ها رو ربات اصلی ما می‌فرسته.</p>
+        <p class="sub">فقط یه چیز ازت می‌خوام: کلید هوش مصنوعی خودت. بازنویسی با اعتبار خودته؛ ربات و توکن جدا هم لازم نیست، پست‌ها رو خودم می‌فرستم.</p>
 
         <div class="warn-box">
           <b>یه قول مردونه:</b> کلیدت امانته. کامل هیچ‌جا نمایش داده نمی‌شه و هر وقت خواستی می‌تونی کلید رو ببندی یا ربات ما رو از ادمینی کانالت برداری؛ دسترسی‌ام همون لحظه قطع می‌شه.
@@ -740,7 +782,7 @@
             <input type="password" id="apiKey" class="ltr mono" placeholder="sk-…" autocomplete="off" spellcheck="false" />
             <button type="button" class="eye" data-eye="apiKey">نمایش</button>
           </div>
-          <p class="hint">بازنویسی خبرها با همین کلید و از اعتبار خودت انجام می‌شه؛ از کلید کسی دیگه‌ای استفاده نمی‌شه.</p>
+          <p class="hint">بازنویسی فقط با همین کلید و اعتبار خودته؛ کلیدت دست کسی نمی‌افته.</p>
           <p class="err" id="keyErr">کلید API رو وارد نکردی یا خیلی کوتاهه، داش.</p>
           <p class="ok-note" id="keyOk">✓ کلید وارد شد.</p>
         </div>
@@ -785,6 +827,7 @@
         <p class="hint" style="text-align:center;margin-top:12px;">کلیدت توی خلاصه به‌صورت ناقص و پوشیده میاد؛ نسخه کاملش فقط وقتی لازمه که خودت مستقیم به ربات بدی.</p>
       </section>
 
+      <p class="signature">این فرم رو با دست و با وسواس چیدیم، نه با قالب آماده؛ هر جا گیر کردی توی پیوی ربات صدام کن، داش.</p>
     </main>
     <div class="toast" id="toast" role="status"></div>
 
