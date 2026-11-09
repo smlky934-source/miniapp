@@ -331,14 +331,16 @@
         width: 22px; height: 22px;
         border-radius: 50%;
         background: var(--ink-soft);
-        transition: transform 0.2s ease, background 0.2s ease;
+        transition: inset-inline-start 0.2s ease, background 0.2s ease;
       }
       .switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
       .switch[aria-checked="true"]::after {
         background: #fff8ea;
-        transform: translateX(-20px);
+        /* دستگیره با inset-inline-start به انتهای خط می‌رود تا حاشیه دو طرف
+           متقارن بماند (ترک ۵۲، دستگیره ۲۲، آفست ۴). عمداً transform نیست:
+           علامت translateX در RTL برعکس می‌شود و دستگیره از ترک بیرون می‌زد. */
+        inset-inline-start: calc(100% - 22px - 4px);
       }
-      [dir="rtl"] .switch[aria-checked="true"]::after { transform: translateX(20px); }
 
       .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .range-val {
@@ -606,21 +608,23 @@
       <!-- ======== Step 2: Channel ======== -->
       <section class="panel" data-step="2" hidden>
         <h2>کانالت کجاست؟</h2>
-        <p class="sub">آیدی کانالی رو بده که قراره توش پست بذارم؛ آخر کار ربات اصلی ‎@Kiumars_Torkibot‎ رو توش ادمین می‌کنی — قدم آخر نشونت می‌دم چطور.</p>
+        <p class="sub">فقط یوزرنیم یا لینک کانالت رو بده؛ خودم کانال رو پیدا می‌کنم، موضوعش رو هم از روی اسم و توضیحاتش تشخیص می‌دم. آخر کار ربات اصلی ‎@Kiumars_Torkibot‎ رو توش ادمین می‌کنی — قدم آخر نشونت می‌دم چطور.</p>
 
         <div class="field">
-          <label class="lbl" for="channelId">آیدی کانال</label>
-          <input type="text" id="channelId" class="ltr" placeholder="@mychannel  یا  -1001234567890" autocomplete="off" />
-          <p class="hint">اگه کانالت عمومیه یوزرنیمش (@...) رو بنویس؛ اگه خصوصیه، آیدی عددیش رو که با ‎-100‎ شروع می‌شه.</p>
-          <p class="err" id="channelErr">این آیدی درست به نظر نمیاد، داش. یا ‎@username‎ بنویس یا آیدی عددی کانال رو.</p>
-          <p class="ok-note" id="channelOk">✓ آیدی کانال قبوله.</p>
+          <label class="lbl" for="channelId">یوزرنیم یا لینک کانال</label>
+          <input type="text" id="channelId" class="ltr" placeholder="@mychannel  یا  t.me/mychannel" autocomplete="off" />
+          <p class="hint">معمولاً همون یوزرنیم کافیه، داش. لینک کانال برای انتهای پست‌ها رو هم از روش می‌سازم.</p>
+          <p class="err" id="channelErr">این یوزرنیم درست به نظر نمیاد، داش. یه چیزی شبیه ‎@mychannel‎ بنویس یا لینک کانال (t.me/…) رو بچسبون.</p>
+          <p class="ok-note" id="channelOk">✓ یوزرنیم کانال قبوله.</p>
         </div>
 
         <div class="field">
-          <label class="lbl" for="channelLink">لینک کانال (برای انتهای پست‌ها)</label>
-          <input type="text" id="channelLink" class="ltr" placeholder="https://t.me/mychannel" autocomplete="off" />
-          <p class="hint">این لینک آخر هر پست میاد. خالی هم بذاری، از روی آیدی می‌سازمش.</p>
-          <p class="err" id="linkErr">لینک باید شبیه ‎https://t.me/…‎ باشه.</p>
+          <label class="lbl" for="channelNum">یا آیدی عددی کانال (اگه یوزرنیم نداره یا پیدا نشد)</label>
+          <input type="text" id="channelNum" class="ltr mono" placeholder="-1001234567890" autocomplete="off" />
+          <p class="hint">اگه کانالت خصوصیه و یوزرنیم نداره، یا با یوزرنیم پیداش نکردم، آیدی عددی‌ش رو اینجا بده؛ اون قطعیه و گم نمی‌شه. اگه هر دو رو پر کنی، آیدی عددی حساب می‌شه.</p>
+          <p class="hint">آیدی عددی رو نداری؟ این فرم رو ببند و از «ثبت‌نام قدم‌به‌قدم» توی چت ربات استفاده کن و یه پست از کانالت برام فوروارد کن؛ خودش درمیاد.</p>
+          <p class="err" id="channelNumErr">آیدی عددی باید یه عددی شبیه ‎-100…‎ باشه، داش.</p>
+          <p class="ok-note" id="channelNumOk">✓ آیدی عددی کانال قبوله.</p>
         </div>
 
         <div class="nav">
@@ -996,10 +1000,34 @@
           chInp.classList.remove("invalid");
           document.getElementById("channelErr").classList.remove("show");
         });
+        var chNum = document.getElementById("channelNum");
+        chNum.addEventListener("input", function () {
+          document.getElementById("channelNumOk").classList.toggle("show", validNumericId(chNum.value.trim()));
+          chNum.classList.remove("invalid");
+          document.getElementById("channelNumErr").classList.remove("show");
+        });
 
-        function validChannel(v) {
-          return /^@[A-Za-z0-9_]{4,}$/.test(v) || /^-100\d{6,}$/.test(v) || /^[A-Za-z][A-Za-z0-9_]{4,}$/.test(v);
+        /* آیدی عددی کانال: شکل ‎-100…‎؛ ارقام فارسی/عربی هم به لاتین برمی‌گردند. */
+        function latinDigits(v) {
+          return String(v || "").replace(/[۰-۹]/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹".indexOf(d); })
+                                .replace(/[٠-٩]/g, function (d) { return "٠١٢٣٤٥٦٧٨٩".indexOf(d); });
         }
+        function validNumericId(v) { return /^-100\d{6,}$/.test(latinDigits(String(v || "").trim())); }
+        function numericIdVal() {
+          var v = latinDigits(chNum.value.trim());
+          return validNumericId(v) ? v : "";
+        }
+
+        /* هندل کانال: @user یا user یا t.me/user یا https://t.me/user.
+           آیدی عددی هم در کادر جدا پذیرفته است و اگر هر دو پر باشند، عددی برنده است. */
+        function parseHandle(v) {
+          v = String(v || "").trim();
+          var m = v.match(/(?:https?:\/\/)?t\.me\/([A-Za-z0-9_]+)/);
+          if (m) return /^[A-Za-z0-9_]{4,}$/.test(m[1]) ? m[1] : null;
+          var u = v.replace(/^@/, "");
+          return /^[A-Za-z0-9_]{4,}$/.test(u) ? u : null;
+        }
+        function validChannel(v) { return !!parseHandle(v); }
 
         /* ----- validation per step ----- */
         function validateStep(n) {
@@ -1011,15 +1039,16 @@
             return t && s;
           }
           if (n === 2) {
-            var v = chInp.value.trim();
-            var ok = validChannel(v);
-            document.getElementById("channelErr").classList.toggle("show", !ok);
-            chInp.classList.toggle("invalid", !ok);
-            var link = document.getElementById("channelLink").value.trim();
-            var linkOk = link === "" || /^https:\/\/t\.me\/[A-Za-z0-9_+\/]+$/.test(link);
-            document.getElementById("linkErr").classList.toggle("show", !linkOk);
-            document.getElementById("channelLink").classList.toggle("invalid", !linkOk);
-            return ok && linkOk;
+            var hv = chInp.value.trim();
+            var nv = chNum.value.trim();
+            var hOk = hv === "" || validChannel(hv);
+            var nOk = nv === "" || validNumericId(nv);
+            var any = (hv !== "" && validChannel(hv)) || (nv !== "" && validNumericId(nv));
+            document.getElementById("channelErr").classList.toggle("show", !hOk || (hv === "" && !any));
+            document.getElementById("channelNumErr").classList.toggle("show", !nOk);
+            chInp.classList.toggle("invalid", !hOk);
+            chNum.classList.toggle("invalid", !nOk);
+            return any && hOk && nOk;
           }
           if (n === 4) {
             var d = selectedTexts(dayBox).length > 0;
@@ -1057,20 +1086,21 @@
           if (k.length <= 8) return "••••••";
           return k.slice(0, 3) + "•••" + k.slice(-4);
         }
+        function channelHandleVal() {
+          var u = parseHandle(chInp.value);
+          return u ? "@" + u : chInp.value.trim();
+        }
         function channelLinkVal() {
-          var link = document.getElementById("channelLink").value.trim();
-          if (link) return link;
-          var id = chInp.value.trim();
-          if (id.charAt(0) === "@") return "https://t.me/" + id.slice(1);
-          if (/^[A-Za-z]/.test(id)) return "https://t.me/" + id;
-          return "—";
+          var u = parseHandle(chInp.value);
+          return u ? "https://t.me/" + u : "—";
         }
         function collect() {
+          var num = numericIdVal();
           return {
             topics: selectedTexts(topicBox),
             sources: selectedTexts(sourceBox),
-            channel: chInp.value.trim(),
-            link: channelLinkVal(),
+            channel: num || channelHandleVal(),
+            link: num ? "—" : channelLinkVal(),
             tone: tone,
             lenMin: lenMin.value,
             lenMax: lenMax.value,
@@ -1097,7 +1127,7 @@
           var html = "";
           html += row("موضوع‌ها", esc(c.topics.join("، ")));
           html += row("منبع‌ها", esc(c.sources.join("، ")));
-          html += row("آیدی کانال", esc(c.channel), true);
+          html += row("کانال", esc(c.channel), true);
           html += row("لینک انتهای پست", esc(c.link), true);
           html += row("لحن پست‌ها", esc(c.tone));
           html += row("طول پست", faNum(c.lenMin) + " تا " + faNum(c.lenMax) + " کلمه");
@@ -1123,7 +1153,7 @@
             "🤖 فعال‌سازی ربات ادمین کانال",
             "موضوع‌ها: " + c.topics.join("، "),
             "منبع‌ها: " + c.sources.join("، "),
-            "آیدی کانال: " + c.channel,
+            "کانال: " + c.channel,
             "لینک کانال: " + c.link,
             "لحن: " + c.tone,
             "طول پست: " + c.lenMin + " تا " + c.lenMax + " کلمه",
