@@ -552,6 +552,22 @@
         </div>
       </section>
 
+      <!-- ======== Manage view (mode=manage) ======== -->
+      <section class="panel" id="manageView" hidden>
+        <h2>⚙️ مدیریت ربات</h2>
+        <p class="sub">داش، از این‌جا رباتت رو مدیریت کن. هر دکمه رو که بزنی، کارش رو انجام می‌دم و نتیجه‌ش رو توی چت بهت می‌گم.</p>
+        <div class="opt-cards">
+          <button type="button" class="opt" data-action="status"><b>📊 وضعیت و اطلاعات رباتم</b><span>وضعیت، کانال، موضوع و ساعت کاری‌ت رو تو چت می‌فرستم.</span></button>
+          <button type="button" class="opt" data-action="stop"><b>⏸ توقف ربات</b><span>ربات دیگه پست نمی‌ذاره تا وقتی دوباره فعالش کنی.</span></button>
+          <button type="button" class="opt" data-action="resume"><b>▶️ فعال‌کردن ربات</b><span>ربات دوباره شروع می‌کنه به پست گذاشتن.</span></button>
+          <button type="button" class="opt" data-action="check"><b>🔍 بررسی ادمین بودن</b><span>اگه تازه منو ادمین کانالت کردی، این‌جا چکش می‌کنم.</span></button>
+          <button type="button" class="opt" data-action="mode"><b>🎨 نوع محتوا</b><span>خبر، پرامپت عکس، یا هر دو — انتخابش تو چت میاد.</span></button>
+          <button type="button" class="opt" data-action="key"><b>🔑 تعویض کلید API</b><span>کلید تازه رو تو چت ازت می‌گیرم و اول چکش می‌کنم.</span></button>
+          <button type="button" class="opt" data-action="delete"><b>🗑 حذف ربات</b><span>حذف کامل ربات و تنظیماتت — تأیید نهاییش تو چته.</span></button>
+        </div>
+        <p class="err" id="manageDiag" hidden></p>
+      </section>
+
       <!-- ======== Progress ======== -->
       <div class="progress" id="progress" aria-hidden="true">
         <div class="seg"><i></i></div>
@@ -1293,6 +1309,30 @@
         }
 
         document.getElementById("restartBtn").addEventListener("click", function () { goTo(1); });
+
+        /* ----- manage mode (?mode=manage): مدیریت ربات به جای فرم ثبت‌نام ----- */
+        var IS_MANAGE = false;
+        try { IS_MANAGE = new URLSearchParams(location.search).get("mode") === "manage"; } catch (e) {}
+        if (IS_MANAGE) {
+          document.querySelectorAll("main.wrap > section:not(#manageView), main.wrap > .progress, main.wrap > .step-label").forEach(function (el) { el.hidden = true; });
+          document.getElementById("manageView").hidden = false;
+          document.querySelectorAll("#manageView [data-action]").forEach(function (b) {
+            b.addEventListener("click", function () {
+              var payload = JSON.stringify({ action: b.getAttribute("data-action") });
+              var diag = document.getElementById("manageDiag");
+              if (tgSendData(payload)) {
+                showToast("انجام شد داش 🚀 نتیجه‌ش تو چته");
+                setTimeout(function () {
+                  var w = window.Telegram && window.Telegram.WebApp;
+                  if (w) { try { w.close(); } catch (e) {} }
+                }, 600);
+              } else {
+                diag.hidden = false;
+                diag.textContent = "ارسال به ربات نشد؛ از دکمه‌های مدیریت توی چت ربات استفاده کن.";
+              }
+            });
+          });
+        }
 
         goTo(1);
       })();
