@@ -623,7 +623,7 @@
           <label class="lbl" for="channelNum">یا آیدی عددی کانال (اگه یوزرنیم نداره یا پیدا نشد)</label>
           <input type="text" id="channelNum" class="ltr mono" placeholder="-1001234567890" autocomplete="off" />
           <p class="hint">اگه کانالت خصوصیه و یوزرنیم نداره، یا با یوزرنیم پیداش نکردم، آیدی عددی‌ش رو اینجا بده؛ اون قطعیه و گم نمی‌شه. اگه هر دو رو پر کنی، آیدی عددی حساب می‌شه.</p>
-          <p class="hint">آیدی عددی رو نداری؟ این فرم رو ببند و از «ثبت‌نام قدم‌به‌قدم» توی چت ربات استفاده کن و یه پست از کانالت برام فوروارد کن؛ خودش درمیاد.</p>
+          <p class="hint">آیدی عددی رو نداری؟ لازم نیست فرم رو از اول بری: توی چت ربات یه پست از کانالت رو برام فوروارد کن، آیدی عددی‌ش رو بهت می‌دم که بیای همین‌جا بذاری؛ وسط ثبت‌نام قدم‌به‌قدم هم که باشی، با همون فوروارد خودش جاش می‌نشینه.</p>
           <p class="err" id="channelNumErr">آیدی عددی باید یه عددی شبیه ‎-100…‎ باشه، داش.</p>
           <p class="ok-note" id="channelNumOk">✓ آیدی عددی کانال قبوله.</p>
         </div>
@@ -654,6 +654,19 @@
               <b>پرانرژی و هیجانی</b>
               <span>تیترهای داغ و ریتم تند برای کانال‌های پرسرعت.</span>
             </button>
+            <button type="button" class="opt" aria-pressed="false" data-tone="__auto__">
+              <b>🤖 خودکار — بر اساس موضوع</b>
+              <span>ربات خودش لحن رو با موضوع کانالت تنظیم می‌کنه؛ مثل ادمین همون حوزه، نه گوینده خبر.</span>
+            </button>
+            <button type="button" class="opt" aria-pressed="false" data-tone="__custom__">
+              <b>✍️ خودم می‌نویسم</b>
+              <span>با کلمات خودت بگو ربات چجوری بنویسه.</span>
+            </button>
+          </div>
+          <div class="field" id="customToneField" hidden>
+            <label class="lbl" for="customTone">لحن دلخواهت رو بنویس</label>
+            <input type="text" id="customTone" placeholder="مثلاً: مثل یه رفیق صمیمی، با شوخی و خودمونی…" autocomplete="off" />
+            <p class="hint">ربات دقیقاً با همین توصیف تو می‌نویسه، داش.</p>
           </div>
         </div>
 
@@ -952,7 +965,16 @@
           this.querySelectorAll(".opt").forEach(function (o) { o.setAttribute("aria-pressed", "false"); });
           b.setAttribute("aria-pressed", "true");
           tone = b.getAttribute("data-tone");
+          document.getElementById("customToneField").hidden = tone !== "__custom__";
         });
+        function toneMode() {
+          return tone === "__auto__" ? "auto" : (tone === "__custom__" ? "custom" : "preset");
+        }
+        function toneText() {
+          if (tone === "__auto__") return "خودکار (بر اساس موضوع کانال)";
+          if (tone === "__custom__") return (document.getElementById("customTone").value || "").trim();
+          return tone;
+        }
 
         /* ----- switches ----- */
         function wireSwitch(id) {
@@ -1119,7 +1141,8 @@
             sources: selectedTexts(sourceBox),
             channel: num || channelHandleVal(),
             link: num ? "—" : channelLinkVal(),
-            tone: tone,
+            tone: toneText(),
+            tone_mode: toneMode(),
             lenMin: lenMin.value,
             lenMax: lenMax.value,
             emoji: swOn(swEmoji),
@@ -1197,7 +1220,8 @@
           var c = collect();
           var slim = {
             topics: c.topics, sources: c.sources, channel: c.channel,
-            tone: c.tone, lenMin: c.lenMin, lenMax: c.lenMax,
+            tone: c.tone_mode === "auto" ? "" : c.tone, tone_mode: c.tone_mode,
+            lenMin: c.lenMin, lenMax: c.lenMax,
             emoji: c.emoji, question: c.question,
             silence: c.silence, silenceFrom: c.silenceFrom, silenceTo: c.silenceTo,
             provider: c.provider, base_url: c.base_url, key: c.key
