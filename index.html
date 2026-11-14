@@ -1310,12 +1310,18 @@
 
         document.getElementById("restartBtn").addEventListener("click", function () { goTo(1); });
 
-        /* ----- manage mode (?mode=manage): مدیریت ربات به جای فرم ثبت‌نام ----- */
+        goTo(1);
+
+        /* ----- manage mode (?mode=manage): مدیریت ربات به جای فرم ثبت‌نام -----
+           این بلوک باید بعد از goTo(1) اجرا شود؛ وگرنه goTo قدم ۱ را دوباره
+           نشان می‌دهد (باگ زنده 2026-11-15). مخفی‌سازی با display هم انجام
+           می‌شود تا نوار پیشرفت هم حتماً برود. */
         var IS_MANAGE = false;
         try { IS_MANAGE = new URLSearchParams(location.search).get("mode") === "manage"; } catch (e) {}
         if (IS_MANAGE) {
-          document.querySelectorAll("main.wrap > section:not(#manageView), main.wrap > .progress, main.wrap > .step-label").forEach(function (el) { el.hidden = true; });
-          document.getElementById("manageView").hidden = false;
+          document.querySelectorAll("main.wrap > section:not(#manageView), main.wrap > .progress, main.wrap > .step-label").forEach(function (el) { el.hidden = true; el.style.display = "none"; });
+          var mv = document.getElementById("manageView");
+          mv.hidden = false; mv.style.display = "";
           document.querySelectorAll("#manageView [data-action]").forEach(function (b) {
             b.addEventListener("click", function () {
               var payload = JSON.stringify({ action: b.getAttribute("data-action") });
@@ -1333,8 +1339,6 @@
             });
           });
         }
-
-        goTo(1);
       })();
     </script>
   </body>
