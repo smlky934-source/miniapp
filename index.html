@@ -523,6 +523,7 @@
       .success-head .ring { transform: rotate(-5deg); border: 2px dashed var(--ok); }
       .signature { text-align: center; color: var(--ink-soft); font-size: 0.8rem; margin: 30px 8px 0; }
     </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
     <main class="wrap">
@@ -783,6 +784,12 @@
           </select>
         </div>
 
+        <div class="field" id="baseUrlField" hidden>
+          <label class="lbl" for="baseUrl">آدرس پایه (Base URL) سرویس</label>
+          <input type="text" id="baseUrl" class="ltr mono" placeholder="https://api.example.com/v1" autocomplete="off" spellcheck="false" />
+          <p class="hint">آدرس API سرویسی که انتخاب کردی رو این‌جا بنویس، داش.</p>
+        </div>
+
         <div class="field">
           <label class="lbl" for="apiKey">کلید API هوش مصنوعی</label>
           <div class="secret-wrap">
@@ -803,11 +810,11 @@
       <!-- ======== Step 6: Review ======== -->
       <section class="panel" data-step="6" hidden>
         <h2>یه نگاه بنداز، داش</h2>
-        <p class="sub">اگه همه‌چیز همینه که می‌خوای، تأیید کن تا خلاصه تنظیماتت رو آماده کنم.</p>
+        <p class="sub">اگه همه‌چیز همینه که می‌خوای، تأیید کن تا ثبت‌نومت همین‌جا کامل شه و بره به ربات.</p>
         <div class="sum" id="summary"></div>
         <div class="nav">
           <button type="button" class="btn" data-back>قبلی</button>
-          <button type="button" class="btn primary" id="confirmBtn">ساختن خلاصه تنظیمات</button>
+          <button type="button" class="btn primary" id="confirmBtn">تأیید و ثبت‌نام 🚀</button>
         </div>
       </section>
 
@@ -818,8 +825,8 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </div>
           <h2>یه قدم آخر مونده، داش! 🎉</h2>
-          <p>خلاصه تنظیماتت آماده‌ست — ولی ثبت‌نومت هنوز کامل نشده. قدم ۲ پایین رو انجام بده تا ربات بیفته به کار.</p>
-          <p style="background:#fff3cd;border:1px solid #e6c34a;border-radius:10px;padding:10px 12px;margin-top:10px;">⚠️ <b>حواست باشه:</b> تا خلاصه رو کپی نکنی و توی پیوی ربات نفرستی، ثبت‌نومت به ربات نمی‌رسه و ربات ازت خبری نداره.</p>
+          <p>این صفحه یعنی فرم رو بیرون از تلگرام باز کردی، واسه همین ثبت‌نومت خودکار نرفت. قدم ۲ پایین رو انجام بده تا ربات بیفته به کار.</p>
+          <p style="background:#fff3cd;border:1px solid #e6c34a;border-radius:10px;padding:10px 12px;margin-top:10px;">💡 <b>دفعه بعد:</b> فرم رو از دکمه آبی توی پیوی ربات باز کن؛ اون‌جا با یه تأیید، ثبت‌نومت همون لحظه کامل می‌شه و این قدم دستی رو نداری.</p>
         </div>
 
         <ol class="next-steps">
@@ -992,6 +999,12 @@
         });
 
         /* ----- live validation hints ----- */
+        var provSel = document.getElementById("aiProvider");
+        var baseField = document.getElementById("baseUrlField");
+        function syncBase() { baseField.hidden = provSel.value.indexOf("ایرانی") === -1; }
+        provSel.addEventListener("change", syncBase);
+        syncBase();
+
         var keyInp = document.getElementById("apiKey");
         keyInp.addEventListener("input", function () {
           var ok = keyInp.value.trim().length >= 12;
@@ -1116,6 +1129,7 @@
             silenceTo: document.getElementById("silenceTo").value,
             days: selectedTexts(dayBox),
             provider: document.getElementById("aiProvider").value,
+            base_url: (document.getElementById("baseUrl").value || "").trim(),
             senderBot: "@Kiumars_Torkibot",
             key: keyInp.value.trim()
           };
@@ -1147,6 +1161,19 @@
         }
 
         document.getElementById("confirmBtn").addEventListener("click", function () {
+          // مسیر اصلی (داخل تلگرام): همه‌چیز — از جمله سرویس و کلید — با
+          // sendData مستقیم به ربات می‌رسد و ثبت‌نام همان‌جا کامل می‌شود.
+          var tg = window.Telegram && window.Telegram.WebApp;
+          var payload = "";
+          try { payload = JSON.stringify(collect()); } catch (e) { payload = ""; }
+          if (tg && tg.initData && payload && payload.length <= 4000) {
+            try {
+              tg.sendData(payload);
+              showToast("ثبت‌نومت رفت به ربات 🚀");
+              return;
+            } catch (e) { /* می‌افتد به مسیر دستی پایین */ }
+          }
+          // مسیر جایگزین (فرم بیرون تلگرام باز شده): خلاصه + کپی دستی.
           goTo(7);
           showToast("مخلصیم داش! خلاصه تنظیماتت آماده‌ست ✅");
         });
