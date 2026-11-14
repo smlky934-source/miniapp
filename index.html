@@ -840,6 +840,7 @@
           <button type="button" class="btn" id="restartBtn">از اول</button>
         </div>
         <p class="hint" style="text-align:center;margin-top:12px;">کلیدت توی خلاصه به‌صورت ناقص و پوشیده میاد؛ نسخه کاملش فقط وقتی لازمه که خودت مستقیم به ربات بدی.</p>
+        <p class="hint mono" id="sendDiag" dir="ltr" style="text-align:center"></p>
       </section>
 
       <p class="signature">این فرم رو با دست و با وسواس چیدیم، نه با قالب آماده؛ هر جا گیر کردی توی پیوی ربات صدام کن، داش.</p>
@@ -1160,20 +1161,66 @@
           document.getElementById("summary").innerHTML = html;
         }
 
-        document.getElementById("confirmBtn").addEventListener("click", function () {
-          // مسیر اصلی (داخل تلگرام): همه‌چیز — از جمله سرویس و کلید — با
-          // sendData مستقیم به ربات می‌رسد و ثبت‌نام همان‌جا کامل می‌شود.
+        // ارسال داده به ربات با چند حمل‌ونقل مختلف (همان پروتکل داخلی
+        // اسکریپت رسمی تلگرام) تا به لود شدن اسکریپت خارجی وابسته نباشیم و
+        // اگر هیچ‌کدام نشد، دلیلش روی صفحه آخر چاپ شود (2026-11-15).
+        function tgSendData(payload) {
+          var diag = [];
           var tg = window.Telegram && window.Telegram.WebApp;
-          var payload = "";
-          try { payload = JSON.stringify(collect()); } catch (e) { payload = ""; }
-          if (tg && tg.initData && payload && payload.length <= 4000) {
+          if (tg && typeof tg.sendData === "function") {
+            try { tg.sendData(payload); return { ok: "api" }; }
+            catch (e) { diag.push("api:" + ((e && e.message) || e)); }
+          } else { diag.push("no-api"); }
+          if (window.TelegramWebviewProxy && window.TelegramWebviewProxy.postEvent) {
             try {
-              tg.sendData(payload);
-              showToast("ثبت‌نومت رفت به ربات 🚀");
-              return;
-            } catch (e) { /* می‌افتد به مسیر دستی پایین */ }
+              window.TelegramWebviewProxy.postEvent("web_app_data_send", JSON.stringify({ data: payload }));
+              return { ok: "proxy" };
+            } catch (e) { diag.push("proxy:" + ((e && e.message) || e)); }
+          } else { diag.push("no-proxy"); }
+          if (window.parent && window.parent !== window) {
+            try {
+              window.parent.postMessage(JSON.stringify({ eventType: "web_app_data_send", eventData: { data: payload } }), "*");
+              return { ok: "iframe" };
+            } catch (e) { diag.push("iframe:" + ((e && e.message) || e)); }
+          } else { diag.push("no-iframe"); }
+          if (window.external && "notify" in window.external) {
+            try {
+              window.external.notify(JSON.stringify({ eventType: "web_app_data_send", eventData: { data: payload } }));
+              return { ok: "external" };
+            } catch (e) { diag.push("ext:" + ((e && e.message) || e)); }
           }
-          // مسیر جایگزین (فرم بیرون تلگرام باز شده): خلاصه + کپی دستی.
+          return { ok: "", diag: diag.join(" | ") };
+        }
+
+        document.getElementById("confirmBtn").addEventListener("click", function () {
+          // پیلود لاغر: فقط فیلدهایی که ربات لازم دارد (سقف تلگرام ۴۰۹۶ بایت است).
+          var c = collect();
+          var slim = {
+            topics: c.topics, sources: c.sources, channel: c.channel,
+            tone: c.tone, lenMin: c.lenMin, lenMax: c.lenMax,
+            emoji: c.emoji, question: c.question,
+            silence: c.silence, silenceFrom: c.silenceFrom, silenceTo: c.silenceTo,
+            provider: c.provider, base_url: c.base_url, key: c.key
+          };
+          var payload = "";
+          try { payload = JSON.stringify(slim); } catch (e) { payload = ""; }
+          var bytes = 0;
+          try { bytes = new Blob([payload]).size; } catch (e) { bytes = payload.length * 2; }
+          if (payload && bytes <= 4096) {
+            var r = tgSendData(payload);
+            if (r.ok) {
+              showToast("ثبت‌نومت رفت به ربات 🚀");
+              var tg2 = window.Telegram && window.Telegram.WebApp;
+              if (tg2 && tg2.close) { setTimeout(function () { try { tg2.close(); } catch (e) {} }, 600); }
+              return;
+            }
+            var dEl = document.getElementById("sendDiag");
+            if (dEl) dEl.textContent = "send failed [" + r.diag + "] bytes=" + bytes;
+          } else {
+            var dEl2 = document.getElementById("sendDiag");
+            if (dEl2) dEl2.textContent = "payload invalid/too big: bytes=" + bytes;
+          }
+          // مسیر جایگزین (فرم بیرون تلگرام باز شده یا ارسال نشد): خلاصه + کپی دستی.
           goTo(7);
           showToast("مخلصیم داش! خلاصه تنظیماتت آماده‌ست ✅");
         });
