@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
+    <link rel="preload" href="Estedad-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="Estedad-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <title>فعال‌سازی ربات ادمین کانال</title>
     <style>
 
@@ -523,7 +525,9 @@
       .success-head .ring { transform: rotate(-5deg); border: 2px dashed var(--ok); }
       .signature { text-align: center; color: var(--ink-soft); font-size: 0.8rem; margin: 30px 8px 0; }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- اسکریپت تلگرام عمداً این‌جا نیست: لود همزمانش از ایران صفحه را قفل
+         می‌کرد؛ پایین صفحه async لود می‌شود و ارسال داده راه‌های جایگزین هم دارد. -->
+
   </head>
   <body>
     <main class="wrap">
@@ -554,16 +558,26 @@
 
       <!-- ======== Manage view (mode=manage) ======== -->
       <section class="panel" id="manageView" hidden>
-        <h2>⚙️ مدیریت ربات</h2>
-        <p class="sub">داش، از این‌جا رباتت رو مدیریت کن. هر دکمه رو که بزنی، کارش رو انجام می‌دم و نتیجه‌ش رو توی چت بهت می‌گم.</p>
-        <div class="opt-cards">
-          <button type="button" class="opt" data-action="status"><b>📊 وضعیت و اطلاعات رباتم</b><span>وضعیت، کانال، موضوع و ساعت کاری‌ت رو تو چت می‌فرستم.</span></button>
-          <button type="button" class="opt" data-action="stop"><b>⏸ توقف ربات</b><span>ربات دیگه پست نمی‌ذاره تا وقتی دوباره فعالش کنی.</span></button>
-          <button type="button" class="opt" data-action="resume"><b>▶️ فعال‌کردن ربات</b><span>ربات دوباره شروع می‌کنه به پست گذاشتن.</span></button>
-          <button type="button" class="opt" data-action="check"><b>🔍 بررسی ادمین بودن</b><span>اگه تازه منو ادمین کانالت کردی، این‌جا چکش می‌کنم.</span></button>
-          <button type="button" class="opt" data-action="mode"><b>🎨 نوع محتوا</b><span>خبر، پرامپت عکس، یا هر دو — انتخابش تو چت میاد.</span></button>
-          <button type="button" class="opt" data-action="key"><b>🔑 تعویض کلید API</b><span>کلید تازه رو تو چت ازت می‌گیرم و اول چکش می‌کنم.</span></button>
-          <button type="button" class="opt" data-action="delete"><b>🗑 حذف ربات</b><span>حذف کامل ربات و تنظیماتت — تأیید نهاییش تو چته.</span></button>
+        <div id="mHub">
+          <h2>⚙️ مدیریت ربات</h2>
+          <p class="sub">داش، این‌جا خونه رباتته؛ هر بخشی رو بزنی همون‌جا برات بازش می‌کنم.</p>
+          <p class="hint" id="mStatus"></p>
+          <div class="opt-cards">
+            <button type="button" class="opt" data-nav="info"><b>📊 اطلاعات رباتم</b><span>وضعیت، کانال، موضوع و مدل هوش مصنوعی</span></button>
+            <button type="button" class="opt" data-nav="settings"><b>📝 تنظیمات محتوا</b><span>موضوع، منبع‌ها و قانون‌های پست</span></button>
+            <button type="button" class="opt" data-nav="hours"><b>🕐 ساعت کاری</b><span>بازه‌ای که ربات توش پست می‌ذاره</span></button>
+            <button type="button" class="opt" data-nav="mode"><b>🎨 نوع محتوا</b><span>خبر، پرامپت عکس، یا هر دو</span></button>
+            <button type="button" class="opt" data-nav="power"><b>⏯ توقف / فعال‌سازی</b><span>ربات رو موقتاً خاموش یا روشن کن</span></button>
+            <button type="button" class="opt" data-nav="key"><b>🔑 تعویض کلید API</b><span>کلید هوش مصنوعی‌ت رو عوض کن</span></button>
+            <button type="button" class="opt" data-action="check" id="mCheckBtn" hidden><b>🔍 بررسی ادمین بودن</b><span>اگه تازه منو ادمین کانالت کردی، این‌جا چکم کن</span></button>
+            <button type="button" class="opt" data-nav="del"><b>🗑 حذف ربات</b><span>حذف کامل ربات و تنظیماتش</span></button>
+          </div>
+        </div>
+        <div id="mSec" hidden>
+          <div class="nav">
+            <button type="button" class="btn" id="mBack">🔙 برگشت به مدیریت</button>
+          </div>
+          <div id="mSecBody"></div>
         </div>
         <p class="err" id="manageDiag" hidden></p>
       </section>
@@ -1314,31 +1328,134 @@
 
         /* ----- manage mode (?mode=manage): مدیریت ربات به جای فرم ثبت‌نام -----
            این بلوک باید بعد از goTo(1) اجرا شود؛ وگرنه goTo قدم ۱ را دوباره
-           نشان می‌دهد (باگ زنده 2026-11-15). مخفی‌سازی با display هم انجام
-           می‌شود تا نوار پیشرفت هم حتماً برود. */
+           نشان می‌دهد (باگ زنده 2026-11-15). اطلاعات کاربر از اسنپ‌شات داخل
+           لینک (پارامتر d) خوانده و داخل خود مینی‌اپ نشان داده می‌شود. */
         var IS_MANAGE = false;
         try { IS_MANAGE = new URLSearchParams(location.search).get("mode") === "manage"; } catch (e) {}
         if (IS_MANAGE) {
           document.querySelectorAll("main.wrap > section:not(#manageView), main.wrap > .progress, main.wrap > .step-label").forEach(function (el) { el.hidden = true; el.style.display = "none"; });
           var mv = document.getElementById("manageView");
           mv.hidden = false; mv.style.display = "";
-          document.querySelectorAll("#manageView [data-action]").forEach(function (b) {
-            b.addEventListener("click", function () {
-              var payload = JSON.stringify({ action: b.getAttribute("data-action") });
-              var diag = document.getElementById("manageDiag");
-              if (tgSendData(payload)) {
-                showToast("انجام شد داش 🚀 نتیجه‌ش تو چته");
-                setTimeout(function () {
-                  var w = window.Telegram && window.Telegram.WebApp;
-                  if (w) { try { w.close(); } catch (e) {} }
-                }, 600);
-              } else {
-                diag.hidden = false;
-                diag.textContent = "ارسال به ربات نشد؛ از دکمه‌های مدیریت توی چت ربات استفاده کن.";
+
+          var D = null;
+          try {
+            var dp = new URLSearchParams(location.search).get("d");
+            if (dp) {
+              var b64 = dp.replace(/-/g, "+").replace(/_/g, "/");
+              var bin = atob(b64);
+              var bytes = new Uint8Array(bin.length);
+              for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              D = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+            }
+          } catch (e) { D = null; }
+
+          var MODE_FA = { news: "فقط خبر", prompt: "فقط پرامپت عکس", both: "هر دو (خبر و پرامپت)" };
+          function statusFa() {
+            if (!D) return "";
+            if (D.p) return "⏳ رباتت در انتظار ادمین‌شدن تو کانالته";
+            return D.a ? "✅ رباتت فعاله و داره کار می‌کنه" : "⏸ رباتت الان متوقفه";
+          }
+          document.getElementById("mStatus").textContent = statusFa();
+          if (D && D.p) document.getElementById("mCheckBtn").hidden = false;
+
+          function row(k, v) {
+            return '<div class="field"><span class="lbl">' + k + '</span><p>' + esc(v || "—") + '</p></div>';
+          }
+          function sendAction(action) {
+            var diag = document.getElementById("manageDiag");
+            if (tgSendData(JSON.stringify({ action: action }))) {
+              showToast("انجام شد داش 🚀");
+              setTimeout(function () {
+                var w = window.Telegram && window.Telegram.WebApp;
+                if (w) { try { w.close(); } catch (e) {} }
+              }, 600);
+            } else {
+              diag.hidden = false;
+              diag.textContent = "ارسال به ربات نشد؛ از دکمه‌های مدیریت توی چت ربات استفاده کن.";
+            }
+          }
+          function actBtn(action, label, primary) {
+            return '<div class="nav"><button type="button" class="btn' + (primary ? " primary" : "") + '" data-action="' + action + '">' + label + '</button></div>';
+          }
+          var SECTIONS = {
+            info: function () {
+              return "<h2>📊 اطلاعات رباتم</h2>"
+                + row("وضعیت", statusFa())
+                + row("کانال", D && D.ch)
+                + row("موضوع", D && D.tp)
+                + row("نوع محتوا", D && MODE_FA[D.md])
+                + row("مدل هوش مصنوعی", D && D.mo)
+                + row("عضویت از", D && D.ca);
+            },
+            settings: function () {
+              return "<h2>📝 تنظیمات محتوا</h2>"
+                + row("موضوع کانال", D && D.tp)
+                + row("منبع‌ها", D && D.src && D.src.length ? D.src.join("، ") : "—")
+                + row("قانون‌های پست", D && D.rl)
+                + '<p class="hint">برای عوض‌کردن موضوع، منبع‌ها یا قانون‌ها، تو چت ربات بهم بگو داش.</p>';
+            },
+            hours: function () {
+              return "<h2>🕐 ساعت کاری</h2>"
+                + row("بازه فعالیت", D ? ("از ساعت " + D.s + " تا " + D.e + " (به وقت تهران)") : "—")
+                + '<p class="hint">ربات فقط تو همین بازه پست می‌ذاره و بیرونش استراحت می‌کنه.</p>';
+            },
+            mode: function () {
+              var cur = D && D.md;
+              function mb(v, t) {
+                return '<button type="button" class="opt" data-action="mode_' + v + '" aria-pressed="' + (cur === v ? "true" : "false") + '"><b>' + t + (cur === v ? " ✓ (الان اینه)" : "") + '</b></button>';
               }
+              return "<h2>🎨 نوع محتوا</h2>"
+                + '<p class="sub">رباتت چه جور محتوایی بذاره؟ بزنی، همون لحظه عوض می‌شه.</p>'
+                + '<div class="opt-cards">' + mb("news", "📰 فقط خبر") + mb("prompt", "🎨 فقط پرامپت عکس") + mb("both", "🔀 هر دو") + '</div>';
+            },
+            power: function () {
+              if (D && D.p) return "<h2>⏯ توقف / فعال‌سازی</h2>" + row("وضعیت", statusFa())
+                + '<p class="hint">اول باید منو تو کانالت ادمین کنی؛ بعد از فعال‌شدن، این‌جا می‌تونی متوقفم کنی.</p>';
+              if (D && !D.a) return "<h2>⏯ توقف / فعال‌سازی</h2>" + row("وضعیت", statusFa())
+                + actBtn("resume", "▶️ فعال‌کردن ربات", true);
+              return "<h2>⏯ توقف / فعال‌سازی</h2>" + row("وضعیت", statusFa())
+                + '<p class="hint">با توقف، ربات دیگه پست نمی‌ذاره؛ تنظیماتت سر جاش می‌مونه.</p>'
+                + actBtn("stop", "⏸ توقف ربات", false);
+            },
+            key: function () {
+              return "<h2>🔑 تعویض کلید API</h2>"
+                + '<p class="sub">کلید تازه رو باید تو چت بفرستی تا رمزنگاری‌شده نگهش دارم (تو صفحه وب نمی‌ذارمش). بزنی روی دکمه، تو چت ازت می‌گیرمش و اول سالم‌بودنش رو چک می‌کنم.</p>'
+                + actBtn("key", "شروع تعویض کلید", true);
+            },
+            del: function () {
+              return "<h2>🗑 حذف ربات</h2>"
+                + '<p class="sub">با حذف، همه تنظیمات و کلیدت پاک می‌شه و ربات دیگه پست نمی‌ذاره. تأیید نهاییش رو تو چت ازت می‌گیرم که اشتباهی نباشه.</p>'
+                + actBtn("delete", "ادامه حذف در چت", false);
+            }
+          };
+          var hub = document.getElementById("mHub");
+          var sec = document.getElementById("mSec");
+          var secBody = document.getElementById("mSecBody");
+          document.querySelectorAll("#mHub [data-nav]").forEach(function (b) {
+            b.addEventListener("click", function () {
+              var fn = SECTIONS[b.getAttribute("data-nav")];
+              if (!fn) return;
+              secBody.innerHTML = fn();
+              hub.hidden = true; sec.hidden = false;
             });
           });
+          document.getElementById("mBack").addEventListener("click", function () {
+            sec.hidden = true; hub.hidden = false;
+          });
+          mv.addEventListener("click", function (e) {
+            var b = e.target.closest("[data-action]");
+            if (b) sendAction(b.getAttribute("data-action"));
+          });
         }
+      })();
+    </script>
+    <script>
+      /* لود ناهمزمان اسکریپت رسمی تلگرام: رندر صفحه منتظرش نمی‌ماند. */
+      (function () {
+        var s = document.createElement("script");
+        s.src = "https://telegram.org/js/telegram-web-app.js";
+        s.async = true;
+        document.head.appendChild(s);
       })();
     </script>
   </body>
