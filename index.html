@@ -14,7 +14,7 @@
       @font-face { font-family: "Estedad"; src: url("Estedad-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
       @font-face { font-family: "Estedad"; src: url("Estedad-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
       @font-face { font-family: "Estedad"; src: url("Estedad-ExtraBold.woff2") format("woff2"); font-weight: 800; font-display: swap; }
-      @font-face { font-family: "Estedad"; src: url("Estedad-Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+      @font-face { font-family: "Estedad"; src: url("Estedad-ExtraBold.woff2") format("woff2"); font-weight: 900; font-display: swap; }
       :root {
         --bg: #f4f1ea;
         --surface: #fffdf8;
@@ -560,24 +560,41 @@
       <section class="panel" id="manageView" hidden>
         <div id="mHub">
           <h2>⚙️ مدیریت ربات</h2>
-          <p class="sub">داش، این‌جا خونه رباتته؛ هر بخشی رو بزنی همون‌جا برات بازش می‌کنم.</p>
+          <p class="sub">داش، هر بخشی رو بزنی می‌برمت به همون صفحه از فرم؛ همون‌جا درستش کن و آخرش «ذخیره تغییرات» رو بزن.</p>
           <p class="hint" id="mStatus"></p>
           <div class="opt-cards">
-            <button type="button" class="opt" data-nav="info"><b>📊 اطلاعات رباتم</b><span>وضعیت، کانال، موضوع و مدل هوش مصنوعی</span></button>
-            <button type="button" class="opt" data-nav="settings"><b>📝 تنظیمات محتوا</b><span>موضوع، منبع‌ها و قانون‌های پست</span></button>
-            <button type="button" class="opt" data-nav="hours"><b>🕐 ساعت کاری</b><span>بازه‌ای که ربات توش پست می‌ذاره</span></button>
-            <button type="button" class="opt" data-nav="mode"><b>🎨 نوع محتوا</b><span>خبر، پرامپت عکس، یا هر دو</span></button>
-            <button type="button" class="opt" data-nav="power"><b>⏯ توقف / فعال‌سازی</b><span>ربات رو موقتاً خاموش یا روشن کن</span></button>
-            <button type="button" class="opt" data-nav="key"><b>🔑 تعویض کلید API</b><span>کلید هوش مصنوعی‌ت رو عوض کن</span></button>
+            <button type="button" class="opt" data-goto="1"><b>📝 موضوع و منبع‌ها</b><span>موضوع کانال و سایت‌هایی که ازشون خبر میارم</span></button>
+            <button type="button" class="opt" data-goto="2"><b>📣 کانال</b><span>کانالی که ربات توش پست می‌ذاره</span></button>
+            <button type="button" class="opt" data-goto="3"><b>📜 قانون‌های پست</b><span>لحن و قانون‌هایی که ربات باهاشون می‌نویسه</span></button>
+            <button type="button" class="opt" data-goto="4"><b>🕐 ساعت کاری</b><span>بازه‌ای که ربات توش پست می‌ذاره</span></button>
+            <button type="button" class="opt" data-goto="5"><b>🔑 سرویس و کلید</b><span>سرویس هوش مصنوعی و تعویض کلید</span></button>
+            <button type="button" class="opt" data-panel="1"><b>🎛 کنترل ربات</b><span>نوع محتوا، روشن/خاموش‌کردن و حذف ربات</span></button>
             <button type="button" class="opt" data-action="check" id="mCheckBtn" hidden><b>🔍 بررسی ادمین بودن</b><span>اگه تازه منو ادمین کانالت کردی، این‌جا چکم کن</span></button>
-            <button type="button" class="opt" data-nav="del"><b>🗑 حذف ربات</b><span>حذف کامل ربات و تنظیماتش</span></button>
           </div>
         </div>
-        <div id="mSec" hidden>
+        <div id="mPanel" hidden>
           <div class="nav">
-            <button type="button" class="btn" id="mBack">🔙 برگشت به مدیریت</button>
+            <button type="button" class="btn" id="mPanelBack">🔙 برگشت به مدیریت</button>
           </div>
-          <div id="mSecBody"></div>
+          <h2>🎛 کنترل ربات</h2>
+          <div class="field">
+            <span class="lbl">نوع محتوا</span>
+            <div class="opt-cards" id="modeCards">
+              <button type="button" class="opt" data-mmode="news"><b>📰 فقط خبر</b></button>
+              <button type="button" class="opt" data-mmode="prompt"><b>🎨 فقط پرامپت عکس</b></button>
+              <button type="button" class="opt" data-mmode="both"><b>🔀 هر دو</b></button>
+            </div>
+            <p class="hint">نوع محتوا با «ذخیره تغییرات» در قدم بررسی اعمال می‌شه؛ یکی از صفحه‌های فرم رو باز کن و تا آخر برو.</p>
+          </div>
+          <div class="field">
+            <span class="lbl">روشن / خاموش</span>
+            <div id="powerArea"></div>
+          </div>
+          <div class="field">
+            <span class="lbl">حذف ربات</span>
+            <p class="hint">حذف کامل فوری نیست؛ اول تو چت ازت تأیید نهایی می‌گیرم.</p>
+            <button type="button" class="btn" data-action="delete">🗑 شروع حذف ربات</button>
+          </div>
         </div>
         <p class="err" id="manageDiag" hidden></p>
       </section>
@@ -740,6 +757,12 @@
             </div>
             <button type="button" class="switch" id="swQuestion" role="switch" aria-checked="false" aria-label="سؤال از مخاطب"></button>
           </div>
+        </div>
+
+        <div class="field" id="rulesTextField" hidden>
+          <label class="lbl" for="rulesText">قانون‌های فعلی رباتت — مستقیم همین‌جا ویرایش کن</label>
+          <textarea id="rulesText" rows="6" maxlength="700"></textarea>
+          <p class="hint">اینا دقیقاً همون قانون‌هاییه که ربات باهاش پست می‌نویسه؛ هر تغییری بدی، با «ذخیره تغییرات» اعمال می‌شه.</p>
         </div>
 
         <div class="nav">
@@ -1103,7 +1126,7 @@
         function validateStep(n) {
           if (n === 1) {
             var t = selectedTexts(topicBox).length > 0;
-            var s = selectedTexts(sourceBox).length > 0;
+            var s = IS_MANAGE ? true : selectedTexts(sourceBox).length > 0;
             document.getElementById("topicErr").classList.toggle("show", !t);
             document.getElementById("sourceErr").classList.toggle("show", !s);
             return t && s;
@@ -1126,7 +1149,9 @@
             return d;
           }
           if (n === 5) {
-            var key = keyInp.value.trim().length >= 12;
+            var key = IS_MANAGE
+              ? (keyInp.value.trim() === "" || keyInp.value.trim().length >= 12)
+              : keyInp.value.trim().length >= 12;
             document.getElementById("keyErr").classList.toggle("show", !key);
             keyInp.classList.toggle("invalid", !key);
             return key;
@@ -1326,10 +1351,11 @@
 
         goTo(1);
 
-        /* ----- manage mode (?mode=manage): مدیریت ربات به جای فرم ثبت‌نام -----
+        /* ----- manage mode (?mode=manage): ویرایش تنظیمات داخل خود مینی‌اپ -----
            این بلوک باید بعد از goTo(1) اجرا شود؛ وگرنه goTo قدم ۱ را دوباره
-           نشان می‌دهد (باگ زنده 2026-11-15). اطلاعات کاربر از اسنپ‌شات داخل
-           لینک (پارامتر d) خوانده و داخل خود مینی‌اپ نشان داده می‌شود. */
+           نشان می‌دهد (باگ زنده 2026-11-15). فرم با اسنپ‌شات داخل لینک
+           (پارامتر d) پیش‌پر می‌شود؛ هاب مدیریت کاربر را به همان صفحه فرم
+           می‌برد و ذخیره نهایی با action=update به ربات می‌رسد. */
         var IS_MANAGE = false;
         try { IS_MANAGE = new URLSearchParams(location.search).get("mode") === "manage"; } catch (e) {}
         if (IS_MANAGE) {
@@ -1349,7 +1375,6 @@
             }
           } catch (e) { D = null; }
 
-          var MODE_FA = { news: "فقط خبر", prompt: "فقط پرامپت عکس", both: "هر دو (خبر و پرامپت)" };
           function statusFa() {
             if (!D) return "";
             if (D.p) return "⏳ رباتت در انتظار ادمین‌شدن تو کانالته";
@@ -1358,12 +1383,111 @@
           document.getElementById("mStatus").textContent = statusFa();
           if (D && D.p) document.getElementById("mCheckBtn").hidden = false;
 
-          function row(k, v) {
-            return '<div class="field"><span class="lbl">' + k + '</span><p>' + esc(v || "—") + '</p></div>';
+          /* ----- پیش‌پرکردن فرم با تنظیمات فعلی ----- */
+          function pressChip(box, text) {
+            var found = false;
+            box.querySelectorAll(".chip").forEach(function (c) {
+              if (c.textContent.trim() === text) { c.setAttribute("aria-pressed", "true"); found = true; }
+            });
+            return found;
           }
+          function unpressAll(box) {
+            box.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+          }
+          var MODE_SEL = (D && D.md) || "news";
+          if (D) {
+            unpressAll(topicBox);
+            String(D.tp || "").split("،").forEach(function (part) {
+              var t = part.trim();
+              if (t && !pressChip(topicBox, t)) addChip(topicBox, t);
+            });
+            unpressAll(sourceBox);
+            (D.srcf || []).forEach(function (url) {
+              var done = false;
+              try {
+                var u = new URL(url);
+                if (u.pathname === "/" || u.pathname === "") done = pressChip(sourceBox, u.hostname.replace(/^www\./, ""));
+              } catch (e) {}
+              if (!done) addChip(sourceBox, url);
+            });
+            if (D.cid) chNum.value = D.cid;
+            else if (D.un) chInp.value = "@" + D.un;
+            document.getElementById("rulesText").value = D.rl || "";
+            var fullDay = Number(D.s) === 0 && Number(D.e) === 24;
+            if (fullDay && swSilence.getAttribute("aria-checked") === "true") swSilence.click();
+            function fmtH(h) { return String(((Number(h) % 24) + 24) % 24).padStart(2, "0") + ":00"; }
+            document.getElementById("silenceFrom").value = fmtH(D.e == null ? 24 : D.e);
+            document.getElementById("silenceTo").value = fmtH(D.s == null ? 8 : D.s);
+            var PV_LABEL = { openai: "OpenAI", gemini: "Google Gemini", anthropic: "Anthropic (Claude)", deepseek: "DeepSeek", groq: "Groq", xai: "Grok (xAI)", openrouter: "OpenRouter", gapgpt: "سرویس ایرانی (سازگار با OpenAI)", avalai: "سرویس ایرانی (سازگار با OpenAI)", custom: "سرویس ایرانی (سازگار با OpenAI)" };
+            var provSel = document.getElementById("aiProvider");
+            if (PV_LABEL[D.pv]) provSel.value = PV_LABEL[D.pv];
+            if (D.bs && (!PV_LABEL[D.pv] || D.pv === "custom" || D.pv === "gapgpt" || D.pv === "avalai")) {
+              document.getElementById("baseUrl").value = D.bs;
+              document.getElementById("baseUrlField").hidden = false;
+            }
+            keyInp.placeholder = "کلید فعلی سر جاشه — فقط برای تعویض پر کن";
+          }
+          /* قدم ۳ در حالت مدیریت: متن قانون‌ها مستقیم ویرایش می‌شود */
+          var step3 = document.querySelector('[data-step="3"]');
+          step3.querySelectorAll(".field:not(#rulesTextField)").forEach(function (f) { f.style.display = "none"; });
+          document.getElementById("rulesTextField").hidden = false;
+
+          /* ----- ناوبری هاب <-> صفحه‌های فرم ----- */
+          var hub = document.getElementById("mHub");
+          var mPanel = document.getElementById("mPanel");
+          function showHome() {
+            panels.forEach(function (p) { p.hidden = true; p.style.display = "none"; });
+            document.getElementById("progress").style.display = "none";
+            stepLabel.style.display = "none";
+            mPanel.hidden = true; hub.hidden = false;
+            mv.hidden = false; mv.style.display = "";
+            window.scrollTo({ top: 0 });
+          }
+          function showStep(n) {
+            mv.hidden = true; mv.style.display = "none";
+            document.getElementById("progress").style.display = "";
+            stepLabel.style.display = "";
+            panels.forEach(function (p) { p.style.display = ""; });
+            goTo(n);
+          }
+          document.querySelectorAll("#mHub [data-goto]").forEach(function (b) {
+            b.addEventListener("click", function () { showStep(Number(b.getAttribute("data-goto"))); });
+          });
+          document.querySelectorAll("#mHub [data-panel]").forEach(function (b) {
+            b.addEventListener("click", function () { hub.hidden = true; mPanel.hidden = false; });
+          });
+          document.getElementById("mPanelBack").addEventListener("click", function () {
+            mPanel.hidden = true; hub.hidden = false;
+          });
+          panels.forEach(function (p) {
+            var n = Number(p.getAttribute("data-step"));
+            if (n >= 1 && n <= 6) {
+              var back = document.createElement("button");
+              back.type = "button"; back.className = "btn"; back.textContent = "🔙 برگشت به مدیریت";
+              back.addEventListener("click", showHome);
+              p.insertBefore(back, p.firstChild);
+            }
+          });
+
+          /* ----- پنل کنترل: نوع محتوا و روشن/خاموش ----- */
+          document.querySelectorAll("#modeCards [data-mmode]").forEach(function (b) {
+            b.setAttribute("aria-pressed", b.getAttribute("data-mmode") === MODE_SEL ? "true" : "false");
+            b.addEventListener("click", function () {
+              MODE_SEL = b.getAttribute("data-mmode");
+              document.querySelectorAll("#modeCards [data-mmode]").forEach(function (x) {
+                x.setAttribute("aria-pressed", x === b ? "true" : "false");
+              });
+            });
+          });
+          var pa = document.getElementById("powerArea");
+          if (D && D.p) pa.innerHTML = '<p class="hint">رباتت هنوز فعال نشده؛ اول منو تو کانالت ادمین کن.</p><button type="button" class="btn primary" data-action="check">🔍 بررسی ادمین بودن</button>';
+          else if (D && !D.a) pa.innerHTML = '<p class="hint">رباتت الان متوقفه و پست نمی‌ذاره.</p><button type="button" class="btn primary" data-action="resume">▶️ فعال‌کردن ربات</button>';
+          else pa.innerHTML = '<p class="hint">رباتت فعاله و داره کار می‌کنه.</p><button type="button" class="btn" data-action="stop">⏸ توقف ربات</button>';
+
+          /* ----- اکشن‌های فوری (توقف/فعال/بررسی/حذف) ----- */
           function sendAction(action) {
             var diag = document.getElementById("manageDiag");
-            if (tgSendData(JSON.stringify({ action: action }))) {
+            if (tgSendData(JSON.stringify({ action: action })).ok) {
               showToast("انجام شد داش 🚀");
               setTimeout(function () {
                 var w = window.Telegram && window.Telegram.WebApp;
@@ -1374,77 +1498,39 @@
               diag.textContent = "ارسال به ربات نشد؛ از دکمه‌های مدیریت توی چت ربات استفاده کن.";
             }
           }
-          function actBtn(action, label, primary) {
-            return '<div class="nav"><button type="button" class="btn' + (primary ? " primary" : "") + '" data-action="' + action + '">' + label + '</button></div>';
-          }
-          var SECTIONS = {
-            info: function () {
-              return "<h2>📊 اطلاعات رباتم</h2>"
-                + row("وضعیت", statusFa())
-                + row("کانال", D && D.ch)
-                + row("موضوع", D && D.tp)
-                + row("نوع محتوا", D && MODE_FA[D.md])
-                + row("مدل هوش مصنوعی", D && D.mo)
-                + row("عضویت از", D && D.ca);
-            },
-            settings: function () {
-              return "<h2>📝 تنظیمات محتوا</h2>"
-                + row("موضوع کانال", D && D.tp)
-                + row("منبع‌ها", D && D.src && D.src.length ? D.src.join("، ") : "—")
-                + row("قانون‌های پست", D && D.rl)
-                + '<p class="hint">برای عوض‌کردن موضوع، منبع‌ها یا قانون‌ها، تو چت ربات بهم بگو داش.</p>';
-            },
-            hours: function () {
-              return "<h2>🕐 ساعت کاری</h2>"
-                + row("بازه فعالیت", D ? ("از ساعت " + D.s + " تا " + D.e + " (به وقت تهران)") : "—")
-                + '<p class="hint">ربات فقط تو همین بازه پست می‌ذاره و بیرونش استراحت می‌کنه.</p>';
-            },
-            mode: function () {
-              var cur = D && D.md;
-              function mb(v, t) {
-                return '<button type="button" class="opt" data-action="mode_' + v + '" aria-pressed="' + (cur === v ? "true" : "false") + '"><b>' + t + (cur === v ? " ✓ (الان اینه)" : "") + '</b></button>';
-              }
-              return "<h2>🎨 نوع محتوا</h2>"
-                + '<p class="sub">رباتت چه جور محتوایی بذاره؟ بزنی، همون لحظه عوض می‌شه.</p>'
-                + '<div class="opt-cards">' + mb("news", "📰 فقط خبر") + mb("prompt", "🎨 فقط پرامپت عکس") + mb("both", "🔀 هر دو") + '</div>';
-            },
-            power: function () {
-              if (D && D.p) return "<h2>⏯ توقف / فعال‌سازی</h2>" + row("وضعیت", statusFa())
-                + '<p class="hint">اول باید منو تو کانالت ادمین کنی؛ بعد از فعال‌شدن، این‌جا می‌تونی متوقفم کنی.</p>';
-              if (D && !D.a) return "<h2>⏯ توقف / فعال‌سازی</h2>" + row("وضعیت", statusFa())
-                + actBtn("resume", "▶️ فعال‌کردن ربات", true);
-              return "<h2>⏯ توقف / فعال‌سازی</h2>" + row("وضعیت", statusFa())
-                + '<p class="hint">با توقف، ربات دیگه پست نمی‌ذاره؛ تنظیماتت سر جاش می‌مونه.</p>'
-                + actBtn("stop", "⏸ توقف ربات", false);
-            },
-            key: function () {
-              return "<h2>🔑 تعویض کلید API</h2>"
-                + '<p class="sub">کلید تازه رو باید تو چت بفرستی تا رمزنگاری‌شده نگهش دارم (تو صفحه وب نمی‌ذارمش). بزنی روی دکمه، تو چت ازت می‌گیرمش و اول سالم‌بودنش رو چک می‌کنم.</p>'
-                + actBtn("key", "شروع تعویض کلید", true);
-            },
-            del: function () {
-              return "<h2>🗑 حذف ربات</h2>"
-                + '<p class="sub">با حذف، همه تنظیمات و کلیدت پاک می‌شه و ربات دیگه پست نمی‌ذاره. تأیید نهاییش رو تو چت ازت می‌گیرم که اشتباهی نباشه.</p>'
-                + actBtn("delete", "ادامه حذف در چت", false);
-            }
-          };
-          var hub = document.getElementById("mHub");
-          var sec = document.getElementById("mSec");
-          var secBody = document.getElementById("mSecBody");
-          document.querySelectorAll("#mHub [data-nav]").forEach(function (b) {
-            b.addEventListener("click", function () {
-              var fn = SECTIONS[b.getAttribute("data-nav")];
-              if (!fn) return;
-              secBody.innerHTML = fn();
-              hub.hidden = true; sec.hidden = false;
-            });
-          });
-          document.getElementById("mBack").addEventListener("click", function () {
-            sec.hidden = true; hub.hidden = false;
-          });
           mv.addEventListener("click", function (e) {
             var b = e.target.closest("[data-action]");
             if (b) sendAction(b.getAttribute("data-action"));
+          });
+
+          /* ----- ذخیره تغییرات (دکمه قدم بررسی در حالت مدیریت) ----- */
+          var cb = document.getElementById("confirmBtn");
+          var nb = cb.cloneNode(true);
+          nb.textContent = "💾 ذخیره تغییرات";
+          cb.parentNode.replaceChild(nb, cb);
+          nb.addEventListener("click", function () {
+            var c = collect();
+            var up = {
+              action: "update",
+              topics: c.topics, sources: c.sources, channel: c.channel,
+              rules_text: document.getElementById("rulesText").value.trim(),
+              silence: c.silence, silenceFrom: c.silenceFrom, silenceTo: c.silenceTo,
+              provider: c.provider, base_url: c.base_url, key: c.key,
+              content_mode: MODE_SEL
+            };
+            var payload = "";
+            try { payload = JSON.stringify(up); } catch (e) { payload = ""; }
+            var bytes = 0;
+            try { bytes = new Blob([payload]).size; } catch (e) { bytes = payload.length * 2; }
+            if (!payload || bytes > 4096) { showToast("متن قانون‌ها خیلی طولانیه، داش؛ یه کم کوتاهش کن 🙏"); return; }
+            var r = tgSendData(payload);
+            if (r.ok) {
+              showToast("تغییرات رفت به ربات 💾");
+              var w = window.Telegram && window.Telegram.WebApp;
+              if (w) { try { w.close(); } catch (e) {} }
+            } else {
+              showToast("ارسال نشد، داش؛ یه بار دیگه بزن 🙏");
+            }
           });
         }
       })();
